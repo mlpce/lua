@@ -140,7 +140,7 @@ static int codepoint (lua_State *L) {
   luaL_checkstack(L, n, "string slice too long");
   n = 0;  /* count the number of returns */
   se = s + pose;  /* string end */
-  for (s += posi - 1; s < se;) {
+  for (s += (ptrdiff_t) posi - 1; s < se;) {
     utfint code;
     s = utf8_decode(s, &code, !lax);
     if (s == NULL)

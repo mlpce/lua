@@ -178,7 +178,7 @@ static int SingleLineInput_Get(SLINPUT_State *state,
 
   SLICHAR *slichar_buffer = malloc(sizeof(SLICHAR) * buffer_size);
   slichar_buffer[0] = 0;
-  const size_t get_result = SLINPUT_Get(state, slichar_prompt, L"",
+  const int get_result = SLINPUT_Get(state, slichar_prompt, L"",
     buffer_size, slichar_buffer);
 
   int result = 0;

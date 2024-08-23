@@ -28,8 +28,8 @@ static int StateGC(struct lua_State *L) {
 }
 
 void EXTEND_Init(struct lua_State *L) {
-  int16_t num_columns = 0;
-  int16_t cursor_margin = 5;
+  uint16_t num_columns = 0;
+  uint16_t cursor_margin = 5;
 
   /* Configure slinput from extend.slinput.columns and
   extend.slinput.cursor_margin if available. */
@@ -42,17 +42,17 @@ void EXTEND_Init(struct lua_State *L) {
       lua_pushstring(L, "columns");
       lua_gettable(L, -2);
       int isnum = 0;
-      int num = (int) lua_tointegerx(L, -1, &isnum);
-      if (isnum)
-        num_columns = num;
+      lua_Integer num = lua_tointegerx(L, -1, &isnum);
+      if (isnum && num >= 0 && num <= UINT16_MAX)
+        num_columns = (uint16_t) num;
       lua_pop(L, 1);  /* pop columns value */
 
       lua_pushstring(L, "cursor_margin");
       lua_gettable(L, -2);
       isnum = 0;
-      num = (int) lua_tointegerx(L, -1, &isnum);
-      if (isnum)
-        cursor_margin = num;
+      num = lua_tointegerx(L, -1, &isnum);
+      if (isnum && num >= 0 && num <= UINT16_MAX)
+        cursor_margin = (uint16_t) num;
       lua_pop(L, 1);  /* pop cursor_margin value */
     }
     lua_pop(L, 1); /* pop slinput value */

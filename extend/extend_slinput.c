@@ -28,8 +28,8 @@ static int StateGC(struct lua_State *L) {
 }
 
 void EXTEND_Init(struct lua_State *L) {
-  uint16_t num_columns = 0;
-  uint16_t cursor_margin = 5;
+  sli_ushort num_columns = 0;
+  sli_ushort cursor_margin = 5;
 
   /* Configure slinput from extend.slinput.columns and
   extend.slinput.cursor_margin if available. */
@@ -43,16 +43,16 @@ void EXTEND_Init(struct lua_State *L) {
       lua_gettable(L, -2);
       int isnum = 0;
       lua_Integer num = lua_tointegerx(L, -1, &isnum);
-      if (isnum && num >= 0 && num <= UINT16_MAX)
-        num_columns = (uint16_t) num;
+      if (isnum && num >= 0 && num <= USHRT_MAX)
+        num_columns = (sli_ushort) num;
       lua_pop(L, 1);  /* pop columns value */
 
       lua_pushstring(L, "cursor_margin");
       lua_gettable(L, -2);
       isnum = 0;
       num = lua_tointegerx(L, -1, &isnum);
-      if (isnum && num >= 0 && num <= UINT16_MAX)
-        cursor_margin = (uint16_t) num;
+      if (isnum && num >= 0 && num <= USHRT_MAX)
+        cursor_margin = (sli_ushort) num;
       lua_pop(L, 1);  /* pop cursor_margin value */
     }
     lua_pop(L, 1); /* pop slinput value */
@@ -106,7 +106,7 @@ static SLINPUT_State *GetState(struct lua_State *L) {
   return state;
 }
 
-static SLICHAR *CharToSLICHAR(const char *multibyte_string,
+static sli_char *CharToSLICHAR(const char *multibyte_string,
     size_t *num_slichars_out) {
 #if SLICHAR_SIZE > 1
   mbstate_t mbs;
@@ -119,7 +119,7 @@ static SLICHAR *CharToSLICHAR(const char *multibyte_string,
   const size_t num_slichars = strlen(multibyte_string);
 #endif
 
-  SLICHAR *slichar_buffer = malloc(sizeof(SLICHAR)*(num_slichars + 1));
+  sli_char *slichar_buffer = malloc(sizeof(sli_char)*(num_slichars + 1));
 
 #if SLICHAR_SIZE > 1
   src_ptr = multibyte_string;
@@ -138,7 +138,7 @@ static SLICHAR *CharToSLICHAR(const char *multibyte_string,
   return slichar_buffer;
 }
 
-static char *SLICHARToChar(const SLICHAR *slichar_string,
+static char *SLICHARToChar(const sli_char *slichar_string,
     size_t *num_mchars_out) {
 #if SLICHAR_SIZE > 1
   const wchar_t *w_ptr = slichar_string;
@@ -170,23 +170,28 @@ static char *SLICHARToChar(const SLICHAR *slichar_string,
 }
 
 static int SingleLineInput_Get(SLINPUT_State *state,
-    const char *prompt, uint16_t buffer_size, char *buffer) {
+    const char *prompt, int buffer_size, char *buffer) {
+  if (buffer_size < 1)
+    return 0;
+
+  const sli_ushort buffer_size_ushort = (sli_ushort) buffer_size;
   size_t num_slichars = 0;
-  SLICHAR *slichar_prompt = CharToSLICHAR(prompt, &num_slichars);
+
+  sli_char *slichar_prompt = CharToSLICHAR(prompt, &num_slichars);
   if (!slichar_prompt)
     return 0;
 
-  SLICHAR *slichar_buffer = malloc(sizeof(SLICHAR) * buffer_size);
+  sli_char *slichar_buffer = malloc(sizeof(sli_char) * buffer_size_ushort);
   slichar_buffer[0] = 0;
-  const int get_result = SLINPUT_Get(state, slichar_prompt, L"",
-    buffer_size, slichar_buffer);
+  const int get_result = SLINPUT_Get(state, slichar_prompt, NULL,
+    buffer_size_ushort, slichar_buffer);
 
   int result = 0;
   if (get_result > 0) {
     size_t num_mchars = 0;
     char *multibyte_buffer = SLICHARToChar(slichar_buffer, &num_mchars);
     if (multibyte_buffer) {
-      if (num_mchars < buffer_size) {
+      if (num_mchars < buffer_size_ushort) {
         memcpy(buffer, multibyte_buffer, num_mchars + 1);
         result = 1;
       }
@@ -200,7 +205,7 @@ static int SingleLineInput_Get(SLINPUT_State *state,
 }
 
 int EXTEND_Get(struct lua_State *L, const char *prompt,
-    uint16_t buffer_size, char *buffer) {
+    int buffer_size, char *buffer) {
   SLINPUT_State *state = GetState(L);
   return state ? SingleLineInput_Get(state, prompt, buffer_size, buffer) :
       (fputs(prompt, stdout), fflush(stdout),
@@ -211,7 +216,7 @@ void EXTEND_SaveLine(struct lua_State *L, const char *line) {
   SLINPUT_State *state = GetState(L);
   if (state) {
     size_t num_slichars = 0;
-    SLICHAR *slichar_buffer = CharToSLICHAR(line, &num_slichars);
+    sli_char *slichar_buffer = CharToSLICHAR(line, &num_slichars);
     if (slichar_buffer) {
       SLINPUT_Save(state, slichar_buffer);
       free(slichar_buffer);

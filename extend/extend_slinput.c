@@ -11,7 +11,11 @@
 #include "extend/extend_slinput.h"
 #include "include/slinput.h"
 
-#if SLICHAR_SIZE > 1
+#ifndef SLI_CHAR_SIZE
+#error SLI_CHAR_SIZE not defined
+#endif
+
+#if SLI_CHAR_SIZE > 1
 #include <wchar.h>
 #endif
 
@@ -108,7 +112,7 @@ static SLINPUT_State *GetState(struct lua_State *L) {
 
 static sli_char *CharToSLICHAR(const char *multibyte_string,
     size_t *num_slichars_out) {
-#if SLICHAR_SIZE > 1
+#if SLI_CHAR_SIZE > 1
   mbstate_t mbs;
   memset(&mbs, 0, sizeof(mbs));
   const char *src_ptr = multibyte_string;
@@ -121,7 +125,7 @@ static sli_char *CharToSLICHAR(const char *multibyte_string,
 
   sli_char *slichar_buffer = malloc(sizeof(sli_char)*(num_slichars + 1));
 
-#if SLICHAR_SIZE > 1
+#if SLI_CHAR_SIZE > 1
   src_ptr = multibyte_string;
   memset(&mbs, 0, sizeof(mbs));
   if (num_slichars !=
@@ -140,7 +144,7 @@ static sli_char *CharToSLICHAR(const char *multibyte_string,
 
 static char *SLICHARToChar(const sli_char *slichar_string,
     size_t *num_mchars_out) {
-#if SLICHAR_SIZE > 1
+#if SLI_CHAR_SIZE > 1
   const wchar_t *w_ptr = slichar_string;
   mbstate_t mbs;
   memset(&mbs, 0, sizeof(mbs));
@@ -153,7 +157,7 @@ static char *SLICHARToChar(const sli_char *slichar_string,
 
   char *multibyte_buffer = malloc(num_mchars + 1);
 
-#if SLICHAR_SIZE > 1
+#if SLI_CHAR_SIZE > 1
   w_ptr = slichar_string;
   memset(&mbs, 0, sizeof(mbs));
   if (num_mchars != wcsrtombs(multibyte_buffer, &w_ptr, num_mchars, &mbs)) {

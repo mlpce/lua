@@ -3,5 +3,5 @@ if (NOT ATARI_TOS_VBCC_ENABLED)
 endif()
 
 add_library(extend STATIC
-  extend_slinput.c
+  extend.c
 )

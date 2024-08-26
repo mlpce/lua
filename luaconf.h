@@ -796,7 +796,7 @@
 
 #ifdef SLINPUT_ENABLED
  
-#include "extend/extend_slinput.h"
+#include "extend/extend.h"
 #define lua_initreadline(L)	(EXTEND_Init(L))
 #define lua_readline(L,b,p)	(EXTEND_Get(L, p, LUA_MAXINPUT, b))
 #define lua_saveline(L,line)	(EXTEND_SaveLine(L, line))

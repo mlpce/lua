@@ -8,7 +8,7 @@
 #endif
 
 #include "lua.h"
-#include "extend/extend_slinput.h"
+#include "extend/extend.h"
 #include "include/slinput.h"
 
 #ifndef SLI_CHAR_SIZE

@@ -41,7 +41,7 @@
 ** Define it if you want Lua to avoid the use of a few C99 features
 ** or Windows-specific features on Windows.
 */
-/* #define LUA_USE_C89 */
+#define LUA_USE_C89
 
 
 /*
@@ -795,7 +795,7 @@
 */
 
 #ifdef SLINPUT_ENABLED
- 
+
 #include "extend/extend.h"
 #define lua_initreadline(L)	(EXTEND_Init(L))
 #define lua_readline(L,b,p)	(EXTEND_Get(L, p, LUA_MAXINPUT, b))

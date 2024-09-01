@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 project(lua VERSION 1.0 LANGUAGES C)
 
+set(CMAKE_C_STANDARD 90)
+
 include_directories(".")
 include_directories("${CMAKE_INSTALL_PREFIX}")
 

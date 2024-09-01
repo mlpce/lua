@@ -129,6 +129,8 @@ static sli_char *CharToSLICHAR(const char *multibyte_string,
 #endif
 
   slichar_buffer = malloc(sizeof(sli_char)*(num_slichars + 1));
+  if (!slichar_buffer)
+    return NULL;
 
 #if SLI_CHAR_SIZE > 1
   src_ptr = multibyte_string;
@@ -163,6 +165,8 @@ static char *SLICHARToChar(const sli_char *slichar_string,
 #endif
 
   multibyte_buffer = malloc(num_mchars + 1);
+  if (!multibyte_buffer)
+    return NULL;
 
 #if SLI_CHAR_SIZE > 1
   w_ptr = slichar_string;
@@ -197,6 +201,11 @@ static int SingleLineInput_Get(SLINPUT_State *state,
     return 0;
 
   slichar_buffer = malloc(sizeof(sli_char) * buffer_size_ushort);
+  if (!slichar_buffer) {
+    free(slichar_prompt);
+    return 0;
+  }
+
   slichar_buffer[0] = 0;
   get_result = SLINPUT_Get(state, slichar_prompt, NULL,
     buffer_size_ushort, slichar_buffer);

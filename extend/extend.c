@@ -39,14 +39,18 @@ void EXTEND_Init(struct lua_State *L) {
   extend.slinput.cursor_margin if available. */
   const char *table_name = "extend";
   int type = lua_getglobal(L, table_name);
+  SLINPUT_State **ud;
+  int is_terminal;
+
   if (type == LUA_TTABLE) {
     lua_pushstring(L, "slinput");
     type = lua_gettable(L, -2);
     if (type == LUA_TTABLE) {
+      int isnum = 0;
+      lua_Integer num;
       lua_pushstring(L, "columns");
       lua_gettable(L, -2);
-      int isnum = 0;
-      lua_Integer num = lua_tointegerx(L, -1, &isnum);
+      num = lua_tointegerx(L, -1, &isnum);
       if (isnum && num >= 0 && num <= USHRT_MAX)
         num_columns = (sli_ushort) num;
       lua_pop(L, 1);  /* pop columns value */
@@ -64,8 +68,7 @@ void EXTEND_Init(struct lua_State *L) {
   lua_pop(L, 1); /* pop extend value */
 
   /* Create a userdata to hold the input line state pointer */
-  SLINPUT_State **ud = lua_newuserdata(L,
-    sizeof(SLINPUT_State *));
+  ud = lua_newuserdata(L, sizeof(SLINPUT_State *));
   /* Initialise the state pointer to null */
   *ud = NULL;
 
@@ -79,9 +82,9 @@ void EXTEND_Init(struct lua_State *L) {
   lua_rawsetp(L, LUA_REGISTRYINDEX, (void *) &M_key);
 
 #ifdef _POSIX_SOURCE
-  const int is_terminal = !!isatty(fileno(stdin));
+  is_terminal = !!isatty(fileno(stdin));
 #else
-  const int is_terminal = 1;
+  is_terminal = 1;
 #endif
 
   if (is_terminal && setlocale(LC_CTYPE, "") != NULL) {
@@ -112,18 +115,20 @@ static SLINPUT_State *GetState(struct lua_State *L) {
 
 static sli_char *CharToSLICHAR(const char *multibyte_string,
     size_t *num_slichars_out) {
+  size_t num_slichars;
+  sli_char *slichar_buffer;
 #if SLI_CHAR_SIZE > 1
+  const char *src_ptr = multibyte_string;
   mbstate_t mbs;
   memset(&mbs, 0, sizeof(mbs));
-  const char *src_ptr = multibyte_string;
-  const size_t num_slichars = mbsrtowcs(NULL, &src_ptr, 0, &mbs);
+  num_slichars = mbsrtowcs(NULL, &src_ptr, 0, &mbs);
   if (num_slichars == (size_t) -1)
     return NULL;
 #else
-  const size_t num_slichars = strlen(multibyte_string);
+  num_slichars = strlen(multibyte_string);
 #endif
 
-  sli_char *slichar_buffer = malloc(sizeof(sli_char)*(num_slichars + 1));
+  slichar_buffer = malloc(sizeof(sli_char)*(num_slichars + 1));
 
 #if SLI_CHAR_SIZE > 1
   src_ptr = multibyte_string;
@@ -144,18 +149,20 @@ static sli_char *CharToSLICHAR(const char *multibyte_string,
 
 static char *SLICHARToChar(const sli_char *slichar_string,
     size_t *num_mchars_out) {
+  size_t num_mchars;
+  char *multibyte_buffer;
 #if SLI_CHAR_SIZE > 1
   const wchar_t *w_ptr = slichar_string;
   mbstate_t mbs;
   memset(&mbs, 0, sizeof(mbs));
-  const size_t num_mchars = wcsrtombs(NULL, &w_ptr, 0, &mbs);
+  num_mchars = wcsrtombs(NULL, &w_ptr, 0, &mbs);
   if (num_mchars == (size_t) -1)
     return NULL;
 #else
-  const size_t num_mchars = strlen(slichar_string);
+  num_mchars = strlen(slichar_string);
 #endif
 
-  char *multibyte_buffer = malloc(num_mchars + 1);
+  multibyte_buffer = malloc(num_mchars + 1);
 
 #if SLI_CHAR_SIZE > 1
   w_ptr = slichar_string;
@@ -175,22 +182,25 @@ static char *SLICHARToChar(const sli_char *slichar_string,
 
 static int SingleLineInput_Get(SLINPUT_State *state,
     const char *prompt, int buffer_size, char *buffer) {
+  const sli_ushort buffer_size_ushort = (sli_ushort) buffer_size;
+  size_t num_slichars = 0;
+  int result = 0;
+  sli_char *slichar_prompt;
+  sli_char *slichar_buffer;
+  int get_result;
+
   if (buffer_size < 1)
     return 0;
 
-  const sli_ushort buffer_size_ushort = (sli_ushort) buffer_size;
-  size_t num_slichars = 0;
-
-  sli_char *slichar_prompt = CharToSLICHAR(prompt, &num_slichars);
+  slichar_prompt = CharToSLICHAR(prompt, &num_slichars);
   if (!slichar_prompt)
     return 0;
 
-  sli_char *slichar_buffer = malloc(sizeof(sli_char) * buffer_size_ushort);
+  slichar_buffer = malloc(sizeof(sli_char) * buffer_size_ushort);
   slichar_buffer[0] = 0;
-  const int get_result = SLINPUT_Get(state, slichar_prompt, NULL,
+  get_result = SLINPUT_Get(state, slichar_prompt, NULL,
     buffer_size_ushort, slichar_buffer);
 
-  int result = 0;
   if (get_result > 0) {
     size_t num_mchars = 0;
     char *multibyte_buffer = SLICHARToChar(slichar_buffer, &num_mchars);

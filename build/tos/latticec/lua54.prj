@@ -1,0 +1,36 @@
+LUA54.LIB
+.C	[-b4 -r6 -d0 -m0 -rs -fm]
+.S	[-m0]
+=
+..\..\..\LAPI.C
+..\..\..\LAUXLIB.C
+..\..\..\LBASELIB.C
+..\..\..\LCODE.C
+..\..\..\LCOROLIB.C
+..\..\..\LCTYPE.C
+..\..\..\LDBLIB.C
+..\..\..\LDEBUG.C
+..\..\..\LDO.C
+..\..\..\LDUMP.C
+..\..\..\LFUNC.C
+..\..\..\LGC.C
+..\..\..\LINIT.C
+..\..\..\LIOLIB.C
+..\..\..\LLEX.C
+..\..\..\LMATHLIB.C
+..\..\..\LMEM.C
+..\..\..\LOADLIB.C
+..\..\..\LOBJECT.C
+..\..\..\LOPCODES.C
+..\..\..\LOSLIB.C
+..\..\..\LPARSER.C
+..\..\..\LSTATE.C
+..\..\..\LSTRING.C
+..\..\..\LSTRLIB.C
+..\..\..\LTABLE.C
+..\..\..\LTABLIB.C
+..\..\..\LTM.C
+..\..\..\LUNDUMP.C
+..\..\..\LUTF8LIB.C
+..\..\..\LVM.C
+..\..\..\LZIO.C

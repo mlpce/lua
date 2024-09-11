@@ -1,0 +1,8 @@
+LUA.TTP
+.C	[-b4 -r6 -d0 -fl -m0 -rs -fm]
+.S	[-m0]
+=
+C.O
+..\..\..\LUA.C	(LUA54.LIB)
+LUA54.LIB
+LC.LIB

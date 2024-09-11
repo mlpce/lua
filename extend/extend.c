@@ -95,8 +95,8 @@ void EXTEND_Init(struct lua_State *L) {
     if (*ud) {
       SLINPUT_Set_NumColumns(*ud, num_columns);
       SLINPUT_Set_CursorMargin(*ud, cursor_margin);
-      SLINPUT_Set_ContinuationCharacterLeft(*ud, '<');
-      SLINPUT_Set_ContinuationCharacterRight(*ud, '>');
+      SLINPUT_Set_ContinueCharLeft(*ud, '<');
+      SLINPUT_Set_ContinueCharRight(*ud, '>');
     }
   }
 }

@@ -7,13 +7,19 @@ set(CMAKE_C_STANDARD 90)
 include_directories(".")
 include_directories("${CMAKE_INSTALL_PREFIX}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSLINPUT_ENABLED")
+set(EXTEND_ENABLED OFF CACHE BOOL "Build extend")
+
+if (EXTEND_ENABLED)
+  # Enable slinput
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSLINPUT_ENABLED")
+  set(EXTEND_LIBRARY_NAME "extend")
+  set(SLINPUT_LIBRARY_NAME "slinput")
+  # Add extend library
+  add_subdirectory(extend)
+endif()
 
 include_directories("${CMAKE_INSTALL_PREFIX}")
 link_directories("${CMAKE_INSTALL_PREFIX}/lib")
-
-# Add extend library
-add_subdirectory(extend)
 
 set(LUA_LIBRARY_NAME "lua54")
 
@@ -59,7 +65,7 @@ set(LUA_EXECUTABLE_NAME "lua")
 endif()
 
 add_executable(${LUA_EXECUTABLE_NAME} lua.c)
-target_link_libraries(${LUA_EXECUTABLE_NAME} ${LUA_LIBRARY_NAME} extend slinput m)
+target_link_libraries(${LUA_EXECUTABLE_NAME} ${LUA_LIBRARY_NAME} ${EXTEND_LIBRARY_NAME} ${SLINPUT_LIBRARY_NAME} m)
 
 set(LUA_PUBLIC_HEADERS "lua.h" "luaconf.h" "lualib.h" "lauxlib.h")
 

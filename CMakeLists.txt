@@ -7,11 +7,11 @@ set(CMAKE_C_STANDARD 90)
 include_directories(".")
 include_directories("${CMAKE_INSTALL_PREFIX}")
 
-set(EXTEND_ENABLED OFF CACHE BOOL "Build extend")
+set(MLPCE_EXTEND_ENABLED OFF CACHE BOOL "Build extend")
 
-if (EXTEND_ENABLED)
-  # Enable slinput
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSLINPUT_ENABLED")
+if (MLPCE_EXTEND_ENABLED)
+  # Enable extend and slinput
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_EXTEND -DMLPCE_EXTEND_SLINPUT")
   set(EXTEND_LIBRARY_NAME "extend")
   set(SLINPUT_LIBRARY_NAME "slinput")
   # Add extend library

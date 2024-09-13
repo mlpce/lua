@@ -1,5 +1,5 @@
 LUA.TTP
-.C	[-b4 -r6 -d0 -fl -m0 -rs -fm]
+.C	[-b4 -r6 -d0 -fl -m0 -rs -fm -dMLPCE_EXTEND]
 .S	[-m0]
 =
 C.O

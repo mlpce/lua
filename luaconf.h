@@ -41,8 +41,12 @@
 ** Define it if you want Lua to avoid the use of a few C99 features
 ** or Windows-specific features on Windows.
 */
+#if defined(MLPCE_EXTEND)
+/* NOTE(mlpce): Use C89 for compatiblity with old compilers */
 #define LUA_USE_C89
-
+#else
+/* #define LUA_USE_C89 */
+#endif
 
 /*
 ** By default, Lua on Windows use (some) specific Windows features
@@ -794,14 +798,15 @@
 ** without modifying the main part of the file.
 */
 
-#ifdef SLINPUT_ENABLED
-
+#if defined(MLPCE_EXTEND)
+/* NOTE(mlpce): Use slinput libary for REPL */
+#if defined(MLPCE_EXTEND_SLINPUT)
 #include "extend/extend.h"
 #define lua_initreadline(L)	(EXTEND_Init(L))
 #define lua_readline(L,b,p)	(EXTEND_Get(L, p, LUA_MAXINPUT, b))
 #define lua_saveline(L,line)	(EXTEND_SaveLine(L, line))
 #define lua_freeline(L,b)	{ (void)L; (void)b; }
-
+#endif
 #endif
 
 #endif

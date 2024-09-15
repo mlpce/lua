@@ -18,7 +18,6 @@ if (MLPCE_EXTEND_ENABLED)
   add_subdirectory(extend)
 endif()
 
-include_directories("${CMAKE_INSTALL_PREFIX}")
 link_directories("${CMAKE_INSTALL_PREFIX}/lib")
 
 set(LUA_LIBRARY_NAME "lua54")

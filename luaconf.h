@@ -42,7 +42,7 @@
 ** or Windows-specific features on Windows.
 */
 #if defined(MLPCE_EXTEND)
-/* NOTE(mlpce): Use C89 for compatiblity with old compilers */
+/* NOTE(mlpce): Use C89 for compatibility with old compilers */
 #define LUA_USE_C89
 #else
 /* #define LUA_USE_C89 */

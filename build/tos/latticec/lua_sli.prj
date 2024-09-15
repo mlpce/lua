@@ -1,0 +1,10 @@
+LUA.TTP
+.C	[-b4 -r6 -d0 -fl -m0 -rs -fm -i..\..\.. -dMLPCE_EXTEND -dMLPCE_EXTEND_SLINPUT]
+.S	[-m0]
+=
+C.O
+..\..\..\LUA.C	(LUA54.LIB)
+..\..\..\EXTEND\EXTEND.C
+SLINPUT.LIB
+LUA54.LIB
+LC.LIB

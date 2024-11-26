@@ -126,7 +126,12 @@
 /*
 @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
 */
+#if defined(MLPCE_EXTEND)
+/* NOTE(mlpce): 32bit integers/floats for faster operation on Atari ST */
+#define LUA_32BITS  1
+#else
 #define LUA_32BITS	0
+#endif
 
 
 /*

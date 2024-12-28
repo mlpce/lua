@@ -8,7 +8,7 @@
 #endif
 
 #include "lua.h"
-#include "extend/extend.h"
+#include "input/input.h"
 #include "include/slinput.h"
 
 #ifndef SLI_CHAR_SIZE
@@ -31,13 +31,13 @@ static int StateGC(struct lua_State *L) {
   return 0;
 }
 
-void EXTEND_Init(struct lua_State *L) {
+void INPUT_Init(struct lua_State *L) {
   sli_ushort num_columns = 0;
   sli_ushort cursor_margin = 5;
 
-  /* Configure slinput from extend.slinput.columns and
-  extend.slinput.cursor_margin if available. */
-  const char *table_name = "extend";
+  /* Configure slinput from input.slinput.columns and
+  input.slinput.cursor_margin if available. */
+  const char *table_name = "input";
   int type = lua_getglobal(L, table_name);
   SLINPUT_State **ud;
   int is_terminal;
@@ -51,7 +51,7 @@ void EXTEND_Init(struct lua_State *L) {
       lua_pushstring(L, "columns");
       lua_gettable(L, -2);
       num = lua_tointegerx(L, -1, &isnum);
-      if (isnum && num >= 0 && num <= USHRT_MAX)
+      if (isnum && num >= 0 && num <= (lua_Integer) USHRT_MAX)
         num_columns = (sli_ushort) num;
       lua_pop(L, 1);  /* pop columns value */
 
@@ -59,7 +59,7 @@ void EXTEND_Init(struct lua_State *L) {
       lua_gettable(L, -2);
       isnum = 0;
       num = lua_tointegerx(L, -1, &isnum);
-      if (isnum && num >= 0 && num <= USHRT_MAX)
+      if (isnum && num >= 0 && num <= (lua_Integer) USHRT_MAX)
         cursor_margin = (sli_ushort) num;
       lua_pop(L, 1);  /* pop cursor_margin value */
     }
@@ -227,7 +227,7 @@ static int SingleLineInput_Get(SLINPUT_State *state,
   return result;
 }
 
-int EXTEND_Get(struct lua_State *L, const char *prompt,
+int INPUT_Get(struct lua_State *L, const char *prompt,
     int buffer_size, char *buffer) {
   SLINPUT_State *state = GetState(L);
   return state ? SingleLineInput_Get(state, prompt, buffer_size, buffer) :
@@ -235,7 +235,7 @@ int EXTEND_Get(struct lua_State *L, const char *prompt,
         fgets(buffer, buffer_size, stdin) != NULL);
 }
 
-void EXTEND_SaveLine(struct lua_State *L, const char *line) {
+void INPUT_SaveLine(struct lua_State *L, const char *line) {
   SLINPUT_State *state = GetState(L);
   if (state) {
     size_t num_slichars = 0;

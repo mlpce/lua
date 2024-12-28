@@ -34,6 +34,9 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
+#ifdef MLPCE_TOSBINDL_ENABLED
+#include "include/tbgemdos.h"
+#endif
 
 /*
 ** these libs are loaded by lua.c and are readily available to any Lua
@@ -44,12 +47,25 @@ static const luaL_Reg loadedlibs[] = {
   {LUA_LOADLIBNAME, luaopen_package},
   {LUA_COLIBNAME, luaopen_coroutine},
   {LUA_TABLIBNAME, luaopen_table},
+#ifdef MLPCE_IOLIB_ENABLED
   {LUA_IOLIBNAME, luaopen_io},
+#endif
+#ifdef MLPCE_OSLIB_ENABLED
   {LUA_OSLIBNAME, luaopen_os},
+#endif
   {LUA_STRLIBNAME, luaopen_string},
+#ifdef MLPCE_MATHLIB_ENABLED
   {LUA_MATHLIBNAME, luaopen_math},
+#endif
+#ifdef MLPCE_UTF8LIB_ENABLED
   {LUA_UTF8LIBNAME, luaopen_utf8},
+#endif
+#ifdef MLPCE_DEBUGLIB_ENABLED
   {LUA_DBLIBNAME, luaopen_debug},
+#endif
+#ifdef MLPCE_TOSBINDL_ENABLED
+  {TOSBINDL_GEMDOSLIBNAME, luaopen_gemdos},
+#endif
   {NULL, NULL}
 };
 

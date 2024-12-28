@@ -41,7 +41,7 @@
 ** Define it if you want Lua to avoid the use of a few C99 features
 ** or Windows-specific features on Windows.
 */
-#if defined(MLPCE_EXTEND)
+#if defined(MLPCE_ENABLED)
 /* NOTE(mlpce): Use C89 for compatibility with old compilers */
 #define LUA_USE_C89
 #else
@@ -126,7 +126,7 @@
 /*
 @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
 */
-#if defined(MLPCE_EXTEND)
+#if defined(MLPCE_ENABLED)
 /* NOTE(mlpce): 32bit integers/floats for faster operation on Atari ST */
 #define LUA_32BITS  1
 #else
@@ -803,13 +803,13 @@
 ** without modifying the main part of the file.
 */
 
-#if defined(MLPCE_EXTEND)
+#if defined(MLPCE_ENABLED)
 /* NOTE(mlpce): Use slinput libary for REPL */
-#if defined(MLPCE_EXTEND_SLINPUT)
-#include "extend/extend.h"
-#define lua_initreadline(L)	(EXTEND_Init(L))
-#define lua_readline(L,b,p)	(EXTEND_Get(L, p, LUA_MAXINPUT, b))
-#define lua_saveline(L,line)	(EXTEND_SaveLine(L, line))
+#if defined(MLPCE_SLINPUT_ENABLED)
+#include "input/input.h"
+#define lua_initreadline(L)	(INPUT_Init(L))
+#define lua_readline(L,b,p)	(INPUT_Get(L, p, LUA_MAXINPUT, b))
+#define lua_saveline(L,line) (INPUT_SaveLine(L, line))
 #define lua_freeline(L,b)	{ (void)L; (void)b; }
 #endif
 #endif

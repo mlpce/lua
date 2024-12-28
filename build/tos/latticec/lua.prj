@@ -1,8 +1,9 @@
 LUA.TTP
-.C	[-b4 -r6 -d0 -fl -m0 -rs -fm -dMLPCE_EXTEND]
+.C	[-b4 -r6 -d0 -fl -m0 -rs -fm -dMLPCE_ENABLED]
 .S	[-m0]
 =
 C.O
 ..\..\..\LUA.C	(LUA54.LIB)
+STACKVAL.C
 LUA54.LIB
 LC.LIB

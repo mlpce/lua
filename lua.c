@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef MLPCE_NOSIGNAL
 #include <signal.h>
+#endif
 
 #include "lua.h"
 
@@ -57,6 +59,7 @@ static void setsignal (int sig, void (*handler)(int)) {
 #endif                               /* } */
 
 
+#ifndef MLPCE_NOSIGNAL
 /*
 ** Hook set by signal function to stop the interpreter.
 */
@@ -78,7 +81,7 @@ static void laction (int i) {
   setsignal(i, SIG_DFL); /* if another SIGINT happens, terminate process */
   lua_sethook(globalL, lstop, flag, 1);
 }
-
+#endif
 
 static void print_usage (const char *badoption) {
   lua_writestringerror("%s: ", progname);
@@ -157,9 +160,13 @@ static int docall (lua_State *L, int narg, int nres) {
   lua_pushcfunction(L, msghandler);  /* push message handler */
   lua_insert(L, base);  /* put it under function and args */
   globalL = L;  /* to be available to 'laction' */
+#ifndef MLPCE_NOSIGNAL
   setsignal(SIGINT, laction);  /* set C-signal handler */
+#endif
   status = lua_pcall(L, narg, nres, base);
+#ifndef MLPCE_NOSIGNAL
   setsignal(SIGINT, SIG_DFL); /* reset C-signal handler */
+#endif
   lua_remove(L, base);  /* remove message handler from the stack */
   return status;
 }
@@ -625,6 +632,9 @@ static void doREPL (lua_State *L) {
 static int pmain (lua_State *L) {
   int argc = (int)lua_tointeger(L, 1);
   char **argv = (char **)lua_touserdata(L, 2);
+#ifdef MLPCE_TOSBINDL_ENABLED
+  char **envp = (char **)lua_touserdata(L, 3);
+#endif
   int script;
   int args = collectargs(argv, &script);
   int optlim = (script > 0) ? script : argc; /* first argv not an option */
@@ -639,6 +649,13 @@ static int pmain (lua_State *L) {
     lua_pushboolean(L, 1);  /* signal for libraries to ignore env. vars. */
     lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
   }
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+  /* Save the gemdos environment pointer in the registry */
+  lua_pushlightuserdata(L, envp);
+  lua_setfield(L, LUA_REGISTRYINDEX, "gemdos.envp");
+#endif
+
   luaL_openlibs(L);  /* open standard libraries */
   createargtable(L, argv, argc, script);  /* create table 'arg' */
   lua_gc(L, LUA_GCRESTART);  /* start GC... */
@@ -666,9 +683,24 @@ static int pmain (lua_State *L) {
   return 1;
 }
 
-
+#ifdef MLPCE_TOSBINDL_ENABLED
+/* Third parameter to main is the gemdos environment */
+int main (int argc, char **argv, char **envp) {
+#else
 int main (int argc, char **argv) {
+#endif
   int status, result;
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+if (0) {
+  const char **envp_temp = (const char **)envp;
+  while (*envp_temp) {
+    printf("env: %s\n", *envp_temp);
+    ++envp_temp;
+  }
+}
+#endif
+
   lua_State *L = luaL_newstate();  /* create state */
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
@@ -678,7 +710,13 @@ int main (int argc, char **argv) {
   lua_pushcfunction(L, &pmain);  /* to call 'pmain' in protected mode */
   lua_pushinteger(L, argc);  /* 1st argument */
   lua_pushlightuserdata(L, argv); /* 2nd argument */
+#ifdef MLPCE_TOSBINDL_ENABLED
+  lua_pushlightuserdata(L, envp); /* 3rd argument */
+  status = lua_pcall(L, 3, 1, 0);  /* do the call */
+#else
   status = lua_pcall(L, 2, 1, 0);  /* do the call */
+#endif
+
   result = lua_toboolean(L, -1);  /* get result */
   report(L, status);
   lua_close(L);

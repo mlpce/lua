@@ -659,7 +659,7 @@ void luaV_concat (lua_State *L, int total) {
       size_t tl = tsslen(tsvalue(s2v(top - 1)));
       TString *ts;
       /* collect total length and number of strings */
-#if defined(MLPCE_EXTEND)
+#if defined(MLPCE_ENABLED)
       /* NOTE(mlpce): Avoid luaV_concat crash for Atari ST Lattice C build
       (suspected compiler bug). Reproduce in REPL with a continued line e.g.
       the following crashes when enter is pressed after the '>> end':

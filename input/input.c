@@ -65,7 +65,7 @@ void INPUT_Init(struct lua_State *L) {
     }
     lua_pop(L, 1); /* pop slinput value */
   }
-  lua_pop(L, 1); /* pop extend value */
+  lua_pop(L, 1); /* pop input value */
 
   /* Create a userdata to hold the input line state pointer */
   ud = lua_newuserdata(L, sizeof(SLINPUT_State *));

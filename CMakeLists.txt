@@ -10,6 +10,10 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" )
     "${CMAKE_C_FLAGS} -Wall -Wextra")
 
   if (ATARI_TOS_ENABLED)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+    endif()
+
     set(LIBCMINI_ENABLED OFF CACHE BOOL "Enable libcmini")
     if (LIBCMINI_ENABLED)
       # Using libcmini

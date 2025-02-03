@@ -206,7 +206,22 @@
 */
 
 #define LUA_VDIR	LUA_VERSION_MAJOR "." LUA_VERSION_MINOR
-#if defined(_WIN32)	/* { */
+
+#if defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+
+/* See MLPCE_TOS_ENABLED setprogdir in loadlib.c */
+#if !defined(LUA_PATH_DEFAULT)
+#define LUA_PATH_DEFAULT ".\\?.lua;.\\?\\init.lua"
+#endif
+#define MLPCE_TOS_PATH_1 "\\lua\\?.lua;"
+#define MLPCE_TOS_PATH_2 "\\lua\\?\\init.lua;"
+
+#if !defined(LUA_CPATH_DEFAULT)
+/* Shared libraries not supported on TOS */
+#define LUA_CPATH_DEFAULT ""
+#endif
+
+#elif defined(_WIN32)	/* { */
 /*
 ** In Windows, any exclamation mark ('!') in the path is replaced by the
 ** path of the directory of the executable file of the current process.
@@ -250,6 +265,10 @@
 
 #endif			/* } */
 
+/* NOTE(mlpce): Separator is backslash on TOS */
+#if defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+#define LUA_DIRSEP "\\"
+#endif
 
 /*
 @@ LUA_DIRSEP is the directory separator (for submodules).

@@ -46,14 +46,16 @@ if (MLPCE_ENABLED)
   set(SLINPUT_LIBRARY_NAME "slinput")
   # Add input
   add_subdirectory(input)
-endif()
 
-if (ATARI_TOS_ENABLED)
-  set(MLPCE_TOSBINDL_ENABLED OFF CACHE BOOL "Enable TOSBINDL")
-  if (MLPCE_TOSBINDL_ENABLED)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOSBINDL_ENABLED")
-    set(TOSBINDL_LIBRARY_NAME "tosbindl")
-    set(TBGEMDOS_LIBRARY_NAME "tbgemdos")
+  if (ATARI_TOS_ENABLED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOS_ENABLED")
+
+    set(MLPCE_TOSBINDL_ENABLED OFF CACHE BOOL "Enable TOSBINDL")
+    if (MLPCE_TOSBINDL_ENABLED)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOSBINDL_ENABLED")
+      set(TOSBINDL_LIBRARY_NAME "tosbindl")
+      set(TBGEMDOS_LIBRARY_NAME "tbgemdos")
+    endif()
   endif()
 endif()
 

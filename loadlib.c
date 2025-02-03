@@ -213,6 +213,119 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
 
 /* }====================================================== */
 
+#elif defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+#undef LIB_FAIL
+#define LIB_FAIL	"absent"
+
+#define DLMSG	"Not supported"
+
+#undef setprogdir
+
+static void push_prefixed_tos_paths(lua_State *L,
+    const char *prefix_start_ptr, const char *prefix_end_ptr) {
+  /* Remove trailing backslash */
+  if (prefix_end_ptr > prefix_start_ptr && *(prefix_end_ptr - 1) == '\\')
+    --prefix_end_ptr;
+
+  luaL_checkstack(L, 4, NULL);
+  lua_pushlstring(L, prefix_start_ptr, prefix_end_ptr - prefix_start_ptr);
+  lua_pushstring(L, MLPCE_TOS_PATH_1);
+  lua_pushlstring(L, prefix_start_ptr, prefix_end_ptr - prefix_start_ptr);
+  lua_pushstring(L, MLPCE_TOS_PATH_2);
+  lua_concat(L, 4);
+}
+
+/*
+** Prefix the path on top of the stack with extra search paths. The passed
+** string may be LUA_PATH_DEFAULT or from environment variable i.e. LUA_PATH or
+** LUA_PATH_5_4. The path is only adjusted if it is set to LUA_PATH_DEFAULT.
+**
+** The system may have booted off floppy, or hard disk, so the search path
+** needs to include the relevant drive. Additionally, path searching may be
+** slow e.g. if accessing a floppy drive, so default searching is kept to a
+** minimal.
+**
+** The environment variable PATH is used to determine the primary search path.
+** If the Lua module being loaded is not found there then a search is also made
+** relative to the current directory.
+**
+** On TOS the desktop sets the environment PATH according to the boot drive so
+** usually A:\ or C:\, however it is possible to customise PATH using e.g. an
+** AUTO folder program. This setprogdir function supports multiple paths within
+** PATH using the ';' delimiter to separate each path.
+**
+** If the environment PATH is not found by getenv, then the current drive is
+** used for the primary search path.
+**
+** Example: When 'PATH=A:\':
+**  A:\lua\?.lua;A:\lua\?\init.lua;.\?.lua;.\?\init.lua;
+**
+** Example: When 'PATH=C:\;C:\script':
+**  C:\lua\?.lua;C:\lua\?\init.lua;C:\script\lua\?.lua;
+**  C:\script\lua\?\init.lua;.\?.lua;.\?\init.lua;
+**
+** Example: When PATH is missing:
+**  \lua\?.lua;\lua\?\init.lua;.\?lua;.\?\init.lua;
+**
+** No special handling is done for LUA_CPATH_DEFAULT as shared libraries are
+** not supported on TOS. LUA_CPATH_DEFAULT is set to empty string in luaconf.h
+** for TOS therefore setprogdir returns early at the strcmp check in that case.
+*/
+static void setprogdir (lua_State *L) {
+  const char *const orig_path = luaL_checkstring(L, -1);
+  const char *const env_path = getenv("PATH");
+  const int initial = lua_gettop(L);
+
+  /* If the orig_path is different to LUA_PATH_DEFAULT then don't change it,
+  as the user set it via LUA_PATH or LUA_PATH_<MAJOR>_<MINOR>. */
+  if (strcmp(orig_path, LUA_PATH_DEFAULT))
+    return;
+
+  /* The original path is LUA_PATH_DEFAULT so adjust it. */
+  if (env_path && env_path[0]) {
+    const char *ptr = env_path;
+    const char *start_ptr = ptr;
+    while (*ptr) {
+      if (*ptr == ';') {
+        push_prefixed_tos_paths(L, start_ptr, ptr);
+        lua_rotate(L, -2, 1);
+        start_ptr = ++ptr;
+      } else {
+        ++ptr;
+      }
+    }
+    if (start_ptr != ptr) {
+      push_prefixed_tos_paths(L, start_ptr, ptr);
+      lua_rotate(L, -2, 1);
+    }
+  } else {
+    luaL_checkstack(L, 2, NULL);
+    lua_pushstring(L, MLPCE_TOS_PATH_1);
+    lua_pushstring(L, MLPCE_TOS_PATH_2);
+    lua_concat(L, 2);
+    lua_rotate(L, -2, 1);
+  }
+
+  lua_concat(L, lua_gettop(L) - initial + 1);
+}
+
+static void lsys_unloadlib (void *lib) {
+  (void)(lib);  /* not used */
+}
+
+
+static void *lsys_load (lua_State *L, const char *path, int seeglb) {
+  (void)(path); (void)(seeglb);  /* not used */
+  lua_pushliteral(L, DLMSG);
+  return NULL;
+}
+
+
+static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
+  (void)(lib); (void)(sym);  /* not used */
+  lua_pushliteral(L, DLMSG);
+  return NULL;
+}
 
 #else				/* }{ */
 /*

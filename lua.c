@@ -692,6 +692,7 @@ int main (int argc, char **argv) {
   int status, result;
 
 #ifdef MLPCE_TOSBINDL_ENABLED
+/*
 if (0) {
   const char **envp_temp = (const char **)envp;
   while (*envp_temp) {
@@ -699,6 +700,7 @@ if (0) {
     ++envp_temp;
   }
 }
+*/
 #endif
 
   lua_State *L = luaL_newstate();  /* create state */

@@ -1,5 +1,5 @@
 LUA54.LIB
-.C	[-b4 -r6 -d0 -m0 -rs -fm -dMLPCE_ENABLED]
+.C	[-b4 -r6 -d0 -m0 -rs -fm -i. -dMLPCE_ENABLED -dMLPCE_TOS_ENABLED -DMLPCE_TOSBINDL_ENABLED]
 .S	[-m0]
 =
 ..\..\..\LAPI.C

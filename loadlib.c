@@ -243,7 +243,7 @@ static void push_prefixed_tos_paths(lua_State *L,
 ** The system may have booted off floppy, or hard disk, so the search path
 ** needs to include the relevant drive. Additionally, path searching may be
 ** slow e.g. if accessing a floppy drive, so default searching is kept to a
-** minimal.
+** minimum.
 **
 ** The environment variable PATH is used to determine the primary search path.
 ** If the Lua module being loaded is not found there then a search is also made
@@ -254,18 +254,18 @@ static void push_prefixed_tos_paths(lua_State *L,
 ** AUTO folder program. This setprogdir function supports multiple paths within
 ** PATH using the ';' delimiter to separate each path.
 **
-** If the environment PATH is not found by getenv, then the current drive is
-** used for the primary search path.
+** If the environment PATH is not found by getenv or is empty, then the current
+** drive is used for the primary search path.
 **
 ** Example: When 'PATH=A:\':
-**  A:\lua\?.lua;A:\lua\?\init.lua;.\?.lua;.\?\init.lua;
+**  A:\lua\?.lua;A:\lua\?\init.lua;.\?.lua;.\?\init.lua
 **
 ** Example: When 'PATH=C:\;C:\script':
 **  C:\lua\?.lua;C:\lua\?\init.lua;C:\script\lua\?.lua;
-**  C:\script\lua\?\init.lua;.\?.lua;.\?\init.lua;
+**  C:\script\lua\?\init.lua;.\?.lua;.\?\init.lua
 **
-** Example: When PATH is missing:
-**  \lua\?.lua;\lua\?\init.lua;.\?lua;.\?\init.lua;
+** Example: When PATH is missing or empty:
+**  \lua\?.lua;\lua\?\init.lua;.\?lua;.\?\init.lua
 **
 ** No special handling is done for LUA_CPATH_DEFAULT as shared libraries are
 ** not supported on TOS. LUA_CPATH_DEFAULT is set to empty string in luaconf.h

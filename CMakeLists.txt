@@ -149,8 +149,10 @@ add_library(${LUA_LIBRARY_NAME} STATIC
 
 if (ATARI_TOS_ENABLED)
 set(LUA_EXECUTABLE_NAME "lua.ttp")
+set(LUAC_EXECUTABLE_NAME "luac.ttp")
 else()
 set(LUA_EXECUTABLE_NAME "lua")
+set(LUAC_EXECUTABLE_NAME "luac")
 endif()
 
 add_executable(
@@ -169,6 +171,18 @@ target_link_libraries(
   ${LIBCMINI_LIBRARIES}
 )
 
+add_executable(
+  ${LUAC_EXECUTABLE_NAME}
+  luac/luac.c
+)
+
+target_link_libraries(
+  ${LUAC_EXECUTABLE_NAME}
+  ${LUA_LIBRARY_NAME}
+  m${ATARI_TOS_VBCC_LIB_SUFFIX}
+  ${LIBCMINI_LIBRARIES}
+)
+
 set(
   LUA_PUBLIC_HEADERS
   "lua.h" "luaconf.h" "lualib.h" "lauxlib.h"
@@ -180,7 +194,7 @@ set_target_properties(
 )
 
 install(
-  TARGETS ${LUA_EXECUTABLE_NAME}
+  TARGETS ${LUA_EXECUTABLE_NAME} ${LUAC_EXECUTABLE_NAME}
   RUNTIME DESTINATION bin
 )
 

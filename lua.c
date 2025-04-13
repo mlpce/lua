@@ -16,6 +16,21 @@
 #ifndef MLPCE_NOSIGNAL
 #include <signal.h>
 #endif
+#ifdef MLPCE_ENABLED
+#define MLPCE_VERSION "v0.1 (dev)"
+#ifdef MLPCE_REVISION_HEADER_ENABLED
+#include "include/revision.h"
+#else
+#define MLPCE_LIBCMINI_PRJ "libcmini"
+#define MLPCE_LIBCMINI_REV ""
+#define MLPCE_LUA_PRJ "lua"
+#define MLPCE_LUA_REV ""
+#define MLPCE_SLINPUT_PRJ "slinput"
+#define MLPCE_SLINPUT_REV ""
+#define MLPCE_TOSBINDL_PRJ "tosbindl"
+#define MLPCE_TOSBINDL_REV ""
+#endif
+#endif
 
 #include "lua.h"
 
@@ -625,6 +640,48 @@ static void doREPL (lua_State *L) {
 /* }================================================================== */
 
 
+#ifdef MLPCE_ENABLED
+static int mlpce_about(lua_State *L) {
+  const int initial = lua_gettop(L);
+
+  /* Information about Lua */
+  luaL_checkstack(L, 2, NULL);
+  lua_pushstring(L, LUA_COPYRIGHT "\nWebsite: https://www.lua.org/\n\n");
+  lua_pushfstring(L, "%s (MIT) fork of lua/lua (MIT) %s\n"
+    "  Adaptations to the Lua source for the Atari ST 16 bit computer.\n",
+    MLPCE_LUA_PRJ, MLPCE_LUA_REV);
+
+  /* Information about enabled libraries */
+#ifdef MLPCE_TOSBINDL_ENABLED
+  /* About tosbindl */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  A GEMDOS binding for Lua.\n",
+    MLPCE_TOSBINDL_PRJ, MLPCE_TOSBINDL_REV);
+#endif
+#ifdef MLPCE_SLINPUT_ENABLED
+  /* About slinput */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  A single line input routine used for the Lua REPL.\n",
+    MLPCE_SLINPUT_PRJ, MLPCE_SLINPUT_REV);
+#endif
+#ifdef MLPCE_LIBCMINI_ENABLED
+  /* About libcmini */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L,
+    "%s (LGPL2.1) %s\n"
+    "  A small footprint C standard library for the Atari ST.\n",
+    MLPCE_LIBCMINI_PRJ, MLPCE_LIBCMINI_REV);
+#endif
+  /* About build version */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushstring(L, "\nBuild " MLPCE_VERSION );
+  lua_concat(L, lua_gettop(L) - initial);
+  return 1;
+}
+#endif
+
 /*
 ** Main body of stand-alone interpreter (to be called in protected mode).
 ** Reads the options and handles them all.
@@ -654,6 +711,11 @@ static int pmain (lua_State *L) {
   /* Save the gemdos environment pointer in the registry */
   lua_pushlightuserdata(L, envp);
   lua_setfield(L, LUA_REGISTRYINDEX, "gemdos.envp");
+#endif
+
+#ifdef MLPCE_ENABLED
+  lua_pushcfunction(L, mlpce_about);
+  lua_setglobal(L, "about");
 #endif
 
   luaL_openlibs(L);  /* open standard libraries */

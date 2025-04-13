@@ -35,6 +35,7 @@
 #include "lauxlib.h"
 
 #ifdef MLPCE_TOSBINDL_ENABLED
+#include "include/tosbindl.h"
 #include "include/tbgemdos.h"
 #endif
 
@@ -64,6 +65,7 @@ static const luaL_Reg loadedlibs[] = {
   {LUA_DBLIBNAME, luaopen_debug},
 #endif
 #ifdef MLPCE_TOSBINDL_ENABLED
+  {TOSBINDL_LIBNAME, luaopen_tosbindl},
   {TOSBINDL_GEMDOSLIBNAME, luaopen_gemdos},
 #endif
   {NULL, NULL}

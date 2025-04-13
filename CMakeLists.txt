@@ -26,6 +26,7 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" )
       set(LIBCMINI_STARTUP_PATH ${CMAKE_INSTALL_PREFIX}/libcmini/startup CACHE STRING "Install path of libcmini startup")
       set(LIBCMINI_LIBRARIES gcc cmini gcc)
 
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_LIBCMINI_ENABLED")
       # libcmini doesn't support signal or locale so disable through defines
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Dl_signalT=char -DMLPCE_NOSIGNAL -D\"lua_getlocaledecpoint()=(\'.'\)\"")
       # linker flags for libcmini. Target also needs to link to LIBCMINI_LIBRARIES.
@@ -56,6 +57,11 @@ if (MLPCE_ENABLED)
       set(TOSBINDL_LIBRARY_NAME "tosbindl")
       set(TBGEMDOS_LIBRARY_NAME "tbgemdos")
     endif()
+  endif()
+
+  set(MLPCE_REVISION_HEADER_ENABLED OFF CACHE BOOL "Enable revision header")
+  if (MLPCE_REVISION_HEADER_ENABLED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_REVISION_HEADER_ENABLED")
   endif()
 endif()
 

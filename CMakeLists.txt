@@ -16,7 +16,8 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" )
 
     set(LIBCMINI_ENABLED OFF CACHE BOOL "Enable libcmini")
     if (LIBCMINI_ENABLED)
-      # Using libcmini
+      # Using libcmini. A small footprint C standard library for the Atari ST.
+      # libcmini is licensed under LGPL-2.1. See https://github.com/freemint/libcmini
       set(LIBCMINI_INCLUDE_PATH ${CMAKE_INSTALL_PREFIX}/libcmini/include CACHE STRING "Install path of libcmini headers")
       include_directories(BEFORE SYSTEM ${LIBCMINI_INCLUDE_PATH})
       if (ATARI_TOS_16BIT_INT)
@@ -39,31 +40,46 @@ include_directories(".")
 include_directories("${CMAKE_INSTALL_PREFIX}")
 
 set(MLPCE_ENABLED OFF CACHE BOOL "Build mlpce changes")
-
 if (MLPCE_ENABLED)
-  # Enable input and slinput
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_ENABLED -DMLPCE_SLINPUT_ENABLED")
+  # MLPCE_ENABLED activates LUA_USE_C89 and LUA_32BITS. It also enables some
+  # changes to work around compiler issues.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_ENABLED")
+endif()
+
+set(MLPCE_REVISION_HEADER_ENABLED OFF CACHE BOOL "Enable revision header")
+if (MLPCE_REVISION_HEADER_ENABLED)
+  # Revision header contains defines indicating repositories and revisions
+  # used to create the build. Adds a global function about() which displays
+  # the repository and revision information for the build. The header must
+  # be generated from without.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_REVISION_HEADER_ENABLED")
+endif()
+
+if (MLPCE_SLINPUT_ENABLED)
+  # Enable input and slinput, a single line input library used for the REPL.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_SLINPUT_ENABLED")
   set(MLPCE_INPUT_LIBRARY_NAME "input")
   set(SLINPUT_LIBRARY_NAME "slinput")
   # Add input
   add_subdirectory(input)
+endif()
 
-  if (ATARI_TOS_ENABLED)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOS_ENABLED")
-
-    set(MLPCE_TOSBINDL_ENABLED OFF CACHE BOOL "Enable TOSBINDL")
-    if (MLPCE_TOSBINDL_ENABLED)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOSBINDL_ENABLED")
-      set(TOSBINDL_LIBRARY_NAME "tosbindl")
-      set(TBGEMDOS_LIBRARY_NAME "tbgemdos")
-    endif()
-  endif()
-
-  set(MLPCE_REVISION_HEADER_ENABLED OFF CACHE BOOL "Enable revision header")
-  if (MLPCE_REVISION_HEADER_ENABLED)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_REVISION_HEADER_ENABLED")
+if (ATARI_TOS_ENABLED)
+  # MLPCE_TOS_ENABLED activates specific package.path and directory separator
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOS_ENABLED")
+  # When building for TOS, it is possible to enable TOSBINDL and the GEMDOS
+  # binding.
+  set(MLPCE_TOSBINDL_ENABLED OFF CACHE BOOL "Enable TOSBINDL")
+  if (MLPCE_TOSBINDL_ENABLED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_TOSBINDL_ENABLED")
+    set(TOSBINDL_LIBRARY_NAME "tosbindl")
+    set(TBGEMDOS_LIBRARY_NAME "tbgemdos")
   endif()
 endif()
+
+# Make iolib, oslib, mathlib, utf8lib and debuglib optional. This can save
+# some executable size. Also when using libcmini iolib and oslib use some
+# features which have not been implemented.
 
 # Lua iolib
 set(MLPCE_IOLIB_ENABLED ON CACHE BOOL "Enable iolib")

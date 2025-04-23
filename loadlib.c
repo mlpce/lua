@@ -213,7 +213,7 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
 
 /* }====================================================== */
 
-#elif defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+#elif defined(MLPCE_TOS_ENABLED)
 #undef LIB_FAIL
 #define LIB_FAIL	"absent"
 

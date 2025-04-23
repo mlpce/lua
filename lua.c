@@ -16,20 +16,10 @@
 #ifndef MLPCE_NOSIGNAL
 #include <signal.h>
 #endif
-#ifdef MLPCE_ENABLED
-#define MLPCE_VERSION "v0.1 (dev)"
+
 #ifdef MLPCE_REVISION_HEADER_ENABLED
+#define MLPCE_VERSION "v0.1 (dev)"
 #include "include/revision.h"
-#else
-#define MLPCE_LIBCMINI_PRJ "libcmini"
-#define MLPCE_LIBCMINI_REV ""
-#define MLPCE_LUA_PRJ "lua"
-#define MLPCE_LUA_REV ""
-#define MLPCE_SLINPUT_PRJ "slinput"
-#define MLPCE_SLINPUT_REV ""
-#define MLPCE_TOSBINDL_PRJ "tosbindl"
-#define MLPCE_TOSBINDL_REV ""
-#endif
 #endif
 
 #include "lua.h"
@@ -640,7 +630,7 @@ static void doREPL (lua_State *L) {
 /* }================================================================== */
 
 
-#ifdef MLPCE_ENABLED
+#ifdef MLPCE_REVISION_HEADER_ENABLED
 static int mlpce_about(lua_State *L) {
   const int initial = lua_gettop(L);
 
@@ -670,7 +660,7 @@ static int mlpce_about(lua_State *L) {
   /* About libcmini */
   luaL_checkstack(L, 1, NULL);
   lua_pushfstring(L,
-    "%s (LGPL2.1) %s\n"
+    "%s (LGPL-2.1) %s\n"
     "  A small footprint C standard library for the Atari ST.\n",
     MLPCE_LIBCMINI_PRJ, MLPCE_LIBCMINI_REV);
 #endif
@@ -713,7 +703,7 @@ static int pmain (lua_State *L) {
   lua_setfield(L, LUA_REGISTRYINDEX, "gemdos.envp");
 #endif
 
-#ifdef MLPCE_ENABLED
+#ifdef MLPCE_REVISION_HEADER_ENABLED
   lua_pushcfunction(L, mlpce_about);
   lua_setglobal(L, "about");
 #endif

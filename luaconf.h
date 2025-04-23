@@ -207,7 +207,7 @@
 
 #define LUA_VDIR	LUA_VERSION_MAJOR "." LUA_VERSION_MINOR
 
-#if defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+#if defined(MLPCE_TOS_ENABLED)
 
 /* See MLPCE_TOS_ENABLED setprogdir in loadlib.c */
 #if !defined(LUA_PATH_DEFAULT)
@@ -266,7 +266,7 @@
 #endif			/* } */
 
 /* NOTE(mlpce): Separator is backslash on TOS */
-#if defined(MLPCE_ENABLED) && defined(MLPCE_TOS_ENABLED)
+#if defined(MLPCE_TOS_ENABLED)
 #define LUA_DIRSEP "\\"
 #endif
 
@@ -822,15 +822,13 @@
 ** without modifying the main part of the file.
 */
 
-#if defined(MLPCE_ENABLED)
-/* NOTE(mlpce): Use slinput libary for REPL */
 #if defined(MLPCE_SLINPUT_ENABLED)
+/* NOTE(mlpce): Use slinput libary for REPL */
 #include "input/input.h"
 #define lua_initreadline(L)	(INPUT_Init(L))
 #define lua_readline(L,b,p)	(INPUT_Get(L, p, LUA_MAXINPUT, b))
 #define lua_saveline(L,line) (INPUT_SaveLine(L, line))
 #define lua_freeline(L,b)	{ (void)L; (void)b; }
-#endif
 #endif
 
 #endif

@@ -18,7 +18,6 @@
 #endif
 
 #ifdef MLPCE_REVISION_HEADER_ENABLED
-#define MLPCE_VERSION "v0.1 (dev)"
 #include "include/revision.h"
 #endif
 
@@ -664,9 +663,17 @@ static int mlpce_about(lua_State *L) {
     "  A small footprint C standard library for the Atari ST.\n",
     MLPCE_LIBCMINI_PRJ, MLPCE_LIBCMINI_REV);
 #endif
-  /* About build version */
-  luaL_checkstack(L, 1, NULL);
-  lua_pushstring(L, "\nBuild " MLPCE_VERSION );
+
+  /* About build script */
+  luaL_checkstack(L, 2, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  Shell scripts for an Atari ST build of Lua.\n\n",
+    MLPCE_BLDSTLUA_PRJ, MLPCE_BLDSTLUA_REV);
+
+  /* Build version */
+  lua_pushfstring(L,  "Build: " MLPCE_BUILD_VERSION "/%d.\n",
+    (int) (sizeof(int) * 8));
+
   lua_concat(L, lua_gettop(L) - initial);
   return 1;
 }

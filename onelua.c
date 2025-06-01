@@ -46,7 +46,9 @@
 #include <locale.h>
 #include <math.h>
 #include <setjmp.h>
+#ifndef MLPCE_NOSIGNAL
 #include <signal.h>
+#endif
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -99,14 +101,24 @@
 #ifndef MAKE_LUAC
 #include "lbaselib.c"
 #include "lcorolib.c"
+#ifdef MLPCE_DEBUGLIB_ENABLED
 #include "ldblib.c"
+#endif
+#ifdef MLPCE_IOLIB_ENABLED
 #include "liolib.c"
+#endif
+#ifdef MLPCE_MATHLIB_ENABLED
 #include "lmathlib.c"
+#endif
 #include "loadlib.c"
+#ifdef MLPCE_OSLIB_ENABLED
 #include "loslib.c"
+#endif
 #include "lstrlib.c"
 #include "ltablib.c"
+#ifdef MLPCE_UTF8LIB_ENABLED
 #include "lutf8lib.c"
+#endif
 #include "linit.c"
 #endif
 

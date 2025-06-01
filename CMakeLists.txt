@@ -112,10 +112,16 @@ if (MLPCE_DEBUGLIB_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_DEBUGLIB_ENABLED")
 endif()
 
+# Onelua - enable to use onelua.c 
+set(MLPCE_ONELUA_ENABLED OFF CACHE BOOL "Enable onelua.c")
+
+# Link directory for installed libs
 link_directories("${CMAKE_INSTALL_PREFIX}/lib")
 
+# Name of the generated Lua library
 set(LUA_LIBRARY_NAME "lua54")
 
+# Lua source files used when MLPCE_ONELUA_ENABLED=OFF
 set(LUA_SRCS
   lapi.c
   lauxlib.c
@@ -146,6 +152,7 @@ set(LUA_SRCS
   lzio.c
 )
 
+# Optional libs.
 if (MLPCE_IOLIB_ENABLED)
   set(LUA_SRCS ${LUA_SRCS} liolib.c)
 endif()
@@ -166,26 +173,33 @@ if (MLPCE_DEBUGLIB_ENABLED)
   set(LUA_SRCS ${LUA_SRCS} ldblib.c)
 endif()
 
-add_library(${LUA_LIBRARY_NAME} STATIC
-  ${LUA_SRCS}
-)
-
-if (ATARI_TOS_ENABLED)
-set(LUA_EXECUTABLE_NAME "lua.ttp")
-set(LUAC_EXECUTABLE_NAME "luac.ttp")
+# Lua library target
+if (MLPCE_ONELUA_ENABLED)
+  # lua library using onelua.c
+  add_library(
+    ${LUA_LIBRARY_NAME}
+    onelua.c
+  )
+  target_compile_options(${LUA_LIBRARY_NAME} PRIVATE -DMAKE_LIB)
 else()
-set(LUA_EXECUTABLE_NAME "lua")
-set(LUAC_EXECUTABLE_NAME "luac")
+  # lua library using LUA_SRCS
+  add_library(${LUA_LIBRARY_NAME} STATIC
+    ${LUA_SRCS}
+  )
 endif()
 
-add_executable(
-  ${LUA_EXECUTABLE_NAME}
-  lua.c
-)
+# For TOS use .TTP executable suffix
+set(EXECUTABLE_SUFFIX "")
+if (ATARI_TOS_ENABLED)
+  set(EXECUTABLE_SUFFIX ".ttp")
+endif()
 
-target_link_libraries(
-  ${LUA_EXECUTABLE_NAME}
-  ${LUA_LIBRARY_NAME}
+# Names for the executables
+set(LUA_EXECUTABLE_NAME "lua${EXECUTABLE_SUFFIX}")
+set(LUAC_EXECUTABLE_NAME "luac${EXECUTABLE_SUFFIX}")
+
+# The libraries to link to lua
+set(LUA_LINK_LIBRARIES
   ${MLPCE_INPUT_LIBRARY_NAME}
   ${SLINPUT_LIBRARY_NAME}
   ${TBGEMDOS_LIBRARY_NAME}
@@ -194,17 +208,57 @@ target_link_libraries(
   ${LIBCMINI_LIBRARIES}
 )
 
-add_executable(
-  ${LUAC_EXECUTABLE_NAME}
-  luac/luac.c
-)
-
-target_link_libraries(
-  ${LUAC_EXECUTABLE_NAME}
-  ${LUA_LIBRARY_NAME}
+# The libraries to link to luac
+set(LUAC_LINK_LIBRARIES
   m${ATARI_TOS_VBCC_LIB_SUFFIX}
   ${LIBCMINI_LIBRARIES}
 )
+
+if (MLPCE_ONELUA_ENABLED)
+  # lua executable using onelua.c
+  add_executable(
+    ${LUA_EXECUTABLE_NAME}
+    onelua.c
+  )
+  target_compile_options(${LUA_EXECUTABLE_NAME} PRIVATE -DMAKE_LUA)
+  target_link_libraries(
+    ${LUA_EXECUTABLE_NAME}
+    ${LUA_LINK_LIBRARIES}
+  )
+
+  # luac executable using onelua.c
+  add_executable(
+    ${LUAC_EXECUTABLE_NAME}
+    onelua.c
+  )
+  target_compile_options(${LUAC_EXECUTABLE_NAME} PRIVATE -DMAKE_LUAC)
+  target_link_libraries(
+    ${LUAC_EXECUTABLE_NAME}
+    ${LUAC_LINK_LIBRARIES}
+  )
+else()
+  # lua executable using lua.c and LUA_SRCS
+  add_executable(
+    ${LUA_EXECUTABLE_NAME}
+    lua.c
+  )
+  target_link_libraries(
+    ${LUA_EXECUTABLE_NAME}
+    ${LUA_LIBRARY_NAME}
+    ${LUA_LINK_LIBRARIES}
+  )
+
+  # luac executable using luac.c and LUA_SRCS
+  add_executable(
+    ${LUAC_EXECUTABLE_NAME}
+    luac.c
+  )
+  target_link_libraries(
+    ${LUAC_EXECUTABLE_NAME}
+    ${LUA_LIBRARY_NAME}
+    ${LUAC_LINK_LIBRARIES}
+  )
+endif()
 
 set(
   LUA_PUBLIC_HEADERS

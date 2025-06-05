@@ -78,6 +78,13 @@ if (ATARI_TOS_ENABLED)
   endif()
 endif()
 
+# Lua parser. When enabled, parser, dump and undump are available.
+# When disabled, only undump is available.
+set(MLPCE_PARSER_ENABLED ON CACHE BOOL "Enable parser")
+if (MLPCE_PARSER_ENABLED)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_PARSER_ENABLED")
+endif()
+
 # Make iolib, oslib, mathlib, utf8lib and debuglib optional. This can save
 # some executable size. Also when using libcmini iolib and oslib use some
 # features which have not been implemented.
@@ -131,16 +138,13 @@ set(LUA_SRCS
   lctype.c
   ldebug.c
   ldo.c
-  ldump.c
   lfunc.c
   lgc.c
   linit.c
-  llex.c
   lmem.c
   loadlib.c
   lobject.c
   lopcodes.c
-  lparser.c
   lstate.c
   lstring.c
   lstrlib.c
@@ -151,6 +155,18 @@ set(LUA_SRCS
   lvm.c
   lzio.c
 )
+
+if (MLPCE_PARSER_ENABLED)
+  # Add parser and dump implementations
+  set(LUA_SRCS ${LUA_SRCS}
+    ldump.c
+    llex.c
+    lparser.c
+  )
+else()
+  # Add parser and dump stubs
+  set(LUA_SRCS ${LUA_SRCS} noparser.c)
+endif()
 
 # Optional libs.
 if (MLPCE_IOLIB_ENABLED)

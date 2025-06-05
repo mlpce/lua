@@ -78,12 +78,21 @@
 #include "lopcodes.c"
 #include "lmem.c"
 #include "lundump.c"
+#ifndef MLPCE_PARSER_ENABLED
+#include "noparser.c"
+#endif
+#ifdef MLPCE_PARSER_ENABLED
 #include "ldump.c"
+#endif
 #include "lstate.c"
 #include "lgc.c"
+#ifdef MLPCE_PARSER_ENABLED
 #include "llex.c"
+#endif
 #include "lcode.c"
+#ifdef MLPCE_PARSER_ENABLED
 #include "lparser.c"
+#endif
 #include "ldebug.c"
 #include "lfunc.c"
 #include "lobject.c"

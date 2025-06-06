@@ -119,6 +119,13 @@ if (MLPCE_DEBUGLIB_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_DEBUGLIB_ENABLED")
 endif()
 
+# Make strerror calls in lauxlib optional to allow executable size to be
+# reduced when statically linking to the standard library.
+set(MLPCE_LAUXLIB_STRERROR_ENABLED ON CACHE BOOL "Enable strerror in lauxlib")
+if (MLPCE_LAUXLIB_STRERROR_ENABLED)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMLPCE_LAUXLIB_STRERROR_ENABLED")
+endif()
+
 # Onelua - enable to use onelua.c 
 set(MLPCE_ONELUA_ENABLED OFF CACHE BOOL "Enable onelua.c")
 
@@ -213,6 +220,7 @@ endif()
 # Names for the executables
 set(LUA_EXECUTABLE_NAME "lua${EXECUTABLE_SUFFIX}")
 set(LUAC_EXECUTABLE_NAME "luac${EXECUTABLE_SUFFIX}")
+set(LUAB_EXECUTABLE_NAME "luab${EXECUTABLE_SUFFIX}")
 
 # The libraries to link to lua
 set(LUA_LINK_LIBRARIES
@@ -252,6 +260,20 @@ if (MLPCE_ONELUA_ENABLED)
     ${LUAC_EXECUTABLE_NAME}
     ${LUAC_LINK_LIBRARIES}
   )
+
+  # luab executable using onelua.c
+  # A minimal script runner to reduce executable size
+  add_executable(
+    ${LUAB_EXECUTABLE_NAME}
+    onelua.c
+  )
+
+  target_compile_options(${LUAB_EXECUTABLE_NAME} PRIVATE -DMLPCE_MAKE_LUAB
+    -DLUA_USE_JUMPTABLE=0) # Jump table disabled to save space
+  target_link_libraries(
+    ${LUAB_EXECUTABLE_NAME}
+    ${LUA_LINK_LIBRARIES}
+  )
 else()
   # lua executable using lua.c and LUA_SRCS
   add_executable(
@@ -274,6 +296,17 @@ else()
     ${LUA_LIBRARY_NAME}
     ${LUAC_LINK_LIBRARIES}
   )
+
+  # luab executable using luab.c and LUA_SRCS
+  add_executable(
+    ${LUAB_EXECUTABLE_NAME}
+    luab.c
+  )
+  target_link_libraries(
+    ${LUAB_EXECUTABLE_NAME}
+    ${LUA_LIBRARY_NAME}
+    ${LUA_LINK_LIBRARIES}
+  )
 endif()
 
 set(
@@ -287,7 +320,7 @@ set_target_properties(
 )
 
 install(
-  TARGETS ${LUA_EXECUTABLE_NAME} ${LUAC_EXECUTABLE_NAME}
+  TARGETS ${LUA_EXECUTABLE_NAME} ${LUAC_EXECUTABLE_NAME} ${LUAB_EXECUTABLE_NAME}
   RUNTIME DESTINATION bin
 )
 

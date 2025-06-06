@@ -250,13 +250,22 @@ LUALIB_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
     return 1;
   }
   else {
+#ifdef MLPCE_LAUXLIB_STRERROR_ENABLED
     const char *msg;
+#endif
     luaL_pushfail(L);
+#ifdef MLPCE_LAUXLIB_STRERROR_ENABLED
     msg = (en != 0) ? strerror(en) : "(no extra info)";
     if (fname)
       lua_pushfstring(L, "%s: %s", fname, msg);
     else
       lua_pushstring(L, msg);
+#else
+    if (fname)
+      lua_pushfstring(L, "%s: errno: %d", fname, en);
+    else
+      lua_pushfstring(L, "errno: %d", en);
+#endif
     lua_pushinteger(L, en);
     return 3;
   }
@@ -738,7 +747,11 @@ static int errfile (lua_State *L, const char *what, int fnameindex) {
   int err = errno;
   const char *filename = lua_tostring(L, fnameindex) + 1;
   if (err != 0)
+#ifdef MLPCE_LAUXLIB_STRERROR_ENABLED
     lua_pushfstring(L, "cannot %s %s: %s", what, filename, strerror(err));
+#else
+    lua_pushfstring(L, "cannot %s %s: errno: %d", what, filename, err);
+#endif
   else
     lua_pushfstring(L, "cannot %s %s", what, filename);
   lua_remove(L, fnameindex);

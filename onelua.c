@@ -131,6 +131,12 @@
 #include "linit.c"
 #endif
 
+/* Minimal lua */
+#ifdef MLPCE_MAKE_LUAB
+#undef MAKE_LUA
+#include "luab.c"
+#endif
+
 /* lua */
 #ifdef MAKE_LUA
 #include "lua.c"

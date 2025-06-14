@@ -8,7 +8,6 @@ set -e
 rm -Rfv 8.3/LUA*
 mkdir -p 8.3/LUA/BUILD/TOS/LATTICEC
 mkdir -p 8.3/LUA/INPUT
-mkdir -p 8.3/LUA/LUAC
 
 function copy_lower_upper() {
   local wild_path=$1
@@ -24,7 +23,6 @@ copy_lower_upper "latticec/lua.prj"
 copy_lower_upper "latticec/lua54.prj"
 copy_lower_upper "latticec/stackval.c"
 copy_lower_upper "../../input/input.[ch]"
-copy_lower_upper "../../luac/luac.c"
 copy_lower_upper "../../lapi.[ch]"
 copy_lower_upper "../../lauxlib.[ch]"
 copy_lower_upper "../../lbaselib.c"
@@ -58,6 +56,7 @@ copy_lower_upper "../../ltable.[ch]"
 copy_lower_upper "../../ltablib.c"
 copy_lower_upper "../../ltm.[ch]"
 copy_lower_upper "../../lua.[ch]"
+copy_lower_upper "../../luac.c"
 copy_lower_upper "../../luaconf.h"
 copy_lower_upper "../../lualib.h"
 copy_lower_upper "../../lundump.[ch]"

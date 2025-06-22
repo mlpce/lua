@@ -58,13 +58,12 @@ static int docall (lua_State *L, int narg) {
 }
 
 static void createargtable (lua_State *L, char **argv, int argc) {
-  int i, narg;
-  narg = argc - 1;
+  int i;
 
-  lua_createtable(L, narg, 0);
-  for (i = 1; i < argc; i++) {
+  lua_newtable(L);
+  for (i = 0; i < argc; i++) {
     lua_pushstring(L, argv[i]);
-    lua_rawseti(L, -2, i);
+    lua_rawseti(L, -2, i - 1);
   }
 
   lua_setglobal(L, "arg");

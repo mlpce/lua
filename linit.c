@@ -20,6 +20,27 @@
 #include "lauxlib.h"
 #include "llimits.h"
 
+#define MLPCE_CHECK_FUNC_PTR
+
+#ifndef MLPCE_DEBUGLIB_ENABLED
+#define luaopen_debug NULL
+#endif
+
+#ifndef MLPCE_IOLIB_ENABLED
+#define luaopen_io NULL
+#endif
+
+#ifndef MLPCE_MATHLIB_ENABLED
+#define luaopen_math NULL
+#endif
+
+#ifndef MLPCE_OSLIB_ENABLED
+#define luaopen_os NULL
+#endif
+
+#ifndef MLPCE_UTF8LIB_ENABLED
+#define luaopen_utf8 NULL
+#endif
 
 /*
 ** Standard Libraries. (Must be listed in the same ORDER of their
@@ -48,6 +69,10 @@ LUALIB_API void luaL_openselectedlibs (lua_State *L, int load, int preload) {
   const luaL_Reg *lib;
   luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_PRELOAD_TABLE);
   for (lib = stdlibs, mask = 1; lib->name != NULL; lib++, mask <<= 1) {
+#ifdef MLPCE_CHECK_FUNC_PTR
+    if (!lib->func)
+      continue;
+#endif
     if (load & mask) {  /* selected? */
       luaL_requiref(L, lib->name, lib->func, 1);  /* require library */
       lua_pop(L, 1);  /* remove result from the stack */

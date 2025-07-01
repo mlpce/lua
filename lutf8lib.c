@@ -132,7 +132,13 @@ static int codepoint (lua_State *L) {
   luaL_checkstack(L, n, "string slice too long");
   n = 0;  /* count the number of returns */
   se = s + pose;  /* string end */
+#if defined(MLPCE_ENABLED)
+  /* NOTE(mlpce): Avoid "pointers can only be subtracted" error when
+  compiling with vbcc for +tos */
+  for (s += (ptrdiff_t) posi - 1; s < se;) {
+#else
   for (s += posi - 1; s < se;) {
+#endif
     l_uint32 code;
     s = utf8_decode(s, &code, !lax);
     if (s == NULL)

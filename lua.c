@@ -13,9 +13,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef MLPCE_NOSIGNAL
 #include <signal.h>
+#endif
+
+#ifdef MLPCE_REVISION_HEADER_ENABLED
+#include "include/revision.h"
+#endif
 
 #include "lua.h"
+
+#if defined(MLPCE_SLINPUT_ENABLED)
+#include "input/input.h"
+#endif
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+#include "include/tosbindl.h"
+#include "include/tbgemdos.h"
+#endif
 
 #include "lauxlib.h"
 #include "lualib.h"
@@ -58,6 +73,7 @@ static void setsignal (int sig, void (*handler)(int)) {
 #endif                               /* } */
 
 
+#ifndef MLPCE_NOSIGNAL
 /*
 ** Hook set by signal function to stop the interpreter.
 */
@@ -79,7 +95,7 @@ static void laction (int i) {
   setsignal(i, SIG_DFL); /* if another SIGINT happens, terminate process */
   lua_sethook(globalL, lstop, flag, 1);
 }
-
+#endif
 
 static void print_usage (const char *badoption) {
   lua_writestringerror("%s: ", progname);
@@ -158,9 +174,13 @@ static int docall (lua_State *L, int narg, int nres) {
   lua_pushcfunction(L, msghandler);  /* push message handler */
   lua_insert(L, base);  /* put it under function and args */
   globalL = L;  /* to be available to 'laction' */
+#ifndef MLPCE_NOSIGNAL
   setsignal(SIGINT, laction);  /* set C-signal handler */
+#endif
   status = lua_pcall(L, narg, nres, base);
+#ifndef MLPCE_NOSIGNAL
   setsignal(SIGINT, SIG_DFL); /* reset C-signal handler */
+#endif
   lua_remove(L, base);  /* remove message handler from the stack */
   return status;
 }
@@ -441,8 +461,26 @@ static int handle_luainit (lua_State *L) {
 ** If lua_readline is defined, all of them should be defined.
 */
 
-#if !defined(lua_readline)	/* { */
+#if defined(MLPCE_SLINPUT_ENABLED)
+static lua_State *input_lua_state;
+static void lua_initreadline(lua_State *L) {
+  input_lua_state = L;
+  INPUT_Init(L);
+}
 
+static char *lua_readline(char *buff, const char *prompt) {
+  return INPUT_Get(input_lua_state, prompt, LUA_MAXINPUT, buff) ? buff : NULL;
+}
+
+static void lua_saveline(const char *line) {
+  INPUT_SaveLine(input_lua_state, line);
+}
+
+static void lua_freeline(char *line) {
+  (void)line;
+}
+
+#elif !defined(lua_readline)	/* { */
 /* Code to use the readline library, either statically or dynamically linked */
 
 /* pointer to 'readline' function (if any) */
@@ -687,6 +725,57 @@ static void doREPL (lua_State *L) {
 
 /* }================================================================== */
 
+
+#ifdef MLPCE_REVISION_HEADER_ENABLED
+static int mlpce_about(lua_State *L) {
+  const int initial = lua_gettop(L);
+
+  /* Information about Lua */
+  luaL_checkstack(L, 2, NULL);
+  lua_pushstring(L, LUA_COPYRIGHT "\nWebsite: https://www.lua.org/\n\n");
+  lua_pushfstring(L, "%s (MIT) fork of lua/lua (MIT) %s\n"
+    "  Adaptations to the Lua source for the Atari ST 16 bit computer.\n",
+    MLPCE_LUA_PRJ, MLPCE_LUA_REV);
+
+  /* Information about enabled libraries */
+#ifdef MLPCE_TOSBINDL_ENABLED
+  /* About tosbindl */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  A GEMDOS binding for Lua.\n",
+    MLPCE_TOSBINDL_PRJ, MLPCE_TOSBINDL_REV);
+#endif
+#ifdef MLPCE_SLINPUT_ENABLED
+  /* About slinput */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  A single line input routine used for the Lua REPL.\n",
+    MLPCE_SLINPUT_PRJ, MLPCE_SLINPUT_REV);
+#endif
+#ifdef MLPCE_LIBCMINI_ENABLED
+  /* About libcmini */
+  luaL_checkstack(L, 1, NULL);
+  lua_pushfstring(L,
+    "%s (LGPL-2.1) %s\n"
+    "  A small footprint C standard library for the Atari ST.\n",
+    MLPCE_LIBCMINI_PRJ, MLPCE_LIBCMINI_REV);
+#endif
+
+  /* About build script */
+  luaL_checkstack(L, 2, NULL);
+  lua_pushfstring(L, "%s (MIT) %s\n"
+    "  Shell scripts for an Atari ST build of Lua.\n\n",
+    MLPCE_BLDSTLUA_PRJ, MLPCE_BLDSTLUA_REV);
+
+  /* Build version */
+  lua_pushfstring(L,  "Build: " MLPCE_BUILD_VERSION "/%d.\n",
+    (int) (sizeof(int) * 8));
+
+  lua_concat(L, lua_gettop(L) - initial);
+  return 1;
+}
+#endif
+
 #if !defined(luai_openlibs)
 #define luai_openlibs(L)	luaL_openselectedlibs(L, ~0, 0)
 #endif
@@ -699,6 +788,9 @@ static void doREPL (lua_State *L) {
 static int pmain (lua_State *L) {
   int argc = (int)lua_tointeger(L, 1);
   char **argv = (char **)lua_touserdata(L, 2);
+#ifdef MLPCE_TOSBINDL_ENABLED
+  char **envp = (char **)lua_touserdata(L, 3);
+#endif
   int script;
   int args = collectargs(argv, &script);
   int optlim = (script > 0) ? script : argc; /* first argv not an option */
@@ -713,7 +805,27 @@ static int pmain (lua_State *L) {
     lua_pushboolean(L, 1);  /* signal for libraries to ignore env. vars. */
     lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
   }
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+  /* Save the gemdos environment pointer in the registry */
+  lua_pushlightuserdata(L, envp);
+  lua_setfield(L, LUA_REGISTRYINDEX, "gemdos.envp");
+#endif
+
+#ifdef MLPCE_REVISION_HEADER_ENABLED
+  lua_pushcfunction(L, mlpce_about);
+  lua_setglobal(L, "about");
+#endif
+
   luai_openlibs(L);  /* open standard libraries */
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+  /* Open tosbindl and gemdos library */
+  luaL_requiref(L, TOSBINDL_LIBNAME, luaopen_tosbindl, 1);
+  luaL_requiref(L, TOSBINDL_GEMDOSLIBNAME, luaopen_gemdos, 1);
+  lua_pop(L, 2);
+#endif
+
   createargtable(L, argv, argc, script);  /* create table 'arg' */
   lua_gc(L, LUA_GCRESTART);  /* start GC... */
   lua_gc(L, LUA_GCGEN);  /* ...in generational mode */
@@ -740,9 +852,24 @@ static int pmain (lua_State *L) {
   return 1;
 }
 
-
+#ifdef MLPCE_TOSBINDL_ENABLED
+/* Third parameter to main is the gemdos environment */
+int main (int argc, char **argv, char **envp) {
+#else
 int main (int argc, char **argv) {
+#endif
   int status, result;
+
+#ifdef MLPCE_TOSBINDL_ENABLED
+/*
+  const char **envp_temp = (const char **)envp;
+  while (*envp_temp) {
+    printf("env: %s\n", *envp_temp);
+    ++envp_temp;
+  }
+*/
+#endif
+
   lua_State *L = luaL_newstate();  /* create state */
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
@@ -752,7 +879,13 @@ int main (int argc, char **argv) {
   lua_pushcfunction(L, &pmain);  /* to call 'pmain' in protected mode */
   lua_pushinteger(L, argc);  /* 1st argument */
   lua_pushlightuserdata(L, argv); /* 2nd argument */
+#ifdef MLPCE_TOSBINDL_ENABLED
+  lua_pushlightuserdata(L, envp); /* 3rd argument */
+  status = lua_pcall(L, 3, 1, 0);  /* do the call */
+#else
   status = lua_pcall(L, 2, 1, 0);  /* do the call */
+#endif
+
   result = lua_toboolean(L, -1);  /* get result */
   report(L, status);
   lua_close(L);

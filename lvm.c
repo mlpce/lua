@@ -665,7 +665,17 @@ void luaV_concat (lua_State *L, int total) {
       size_t tl = tsslen(tsvalue(s2v(top - 1)));
       TString *ts;
       /* collect total length and number of strings */
+#if defined(MLPCE_ENABLED)
+      /* NOTE(mlpce): Avoid luaV_concat crash for Atari ST Lattice C build
+      (suspected compiler bug). Reproduce in REPL with a continued line e.g.
+      the following crashes when enter is pressed after the '>> end':
+        > for i=1,2 do
+        >> end
+      Adding the !! before the tostring macro fixes the crash. */
+      for (n = 1; n < total && !!tostring(L, s2v(top - n - 1)); n++) {
+#else
       for (n = 1; n < total && tostring(L, s2v(top - n - 1)); n++) {
+#endif
         size_t l = tsslen(tsvalue(s2v(top - n - 1)));
         if (l_unlikely(l >= MAX_SIZE - sizeof(TString) - tl)) {
           L->top.p = top - total;  /* pop strings to avoid wasting stack */

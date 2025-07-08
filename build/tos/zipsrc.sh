@@ -20,7 +20,7 @@ function copy_lower_upper() {
 
 # Copy files as 8.3 filenames
 copy_lower_upper "latticec/lua.prj"
-copy_lower_upper "latticec/lua54.prj"
+copy_lower_upper "latticec/lua55.prj"
 copy_lower_upper "latticec/stackval.c"
 copy_lower_upper "../../input/input.[ch]"
 copy_lower_upper "../../lapi.[ch]"

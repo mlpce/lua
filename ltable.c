@@ -56,7 +56,13 @@ typedef struct { Node *dummy; Node follows_pNode; } Limbox_aux;
 
 typedef union {
   Node *lastfree;
+#if (defined(MLPCE_ENABLED) && defined(ATARI) && defined(LATTICE))
+  /* Work around "invalid constant expression" error on Atari ST Lattice C
+  build (compiler bug - it should be an integral constant expression). */
+  char padding[4];
+#else
   char padding[offsetof(Limbox_aux, follows_pNode)];
+#endif
 } Limbox;
 
 #define haslastfree(t)     ((t)->lsizenode >= LIMFORLAST)

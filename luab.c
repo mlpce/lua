@@ -14,6 +14,7 @@ arguments are passed on the command line. */
 #ifdef MLPCE_TOSBINDL_ENABLED
 #include "include/tosbindl.h"
 #include "include/tbgemdos.h"
+#include "include/tbgempb.h"
 #endif
 
 #include "lauxlib.h"
@@ -128,7 +129,8 @@ static int pmain (lua_State *L) {
   /* Open tosbindl and gemdos library */
   luaL_requiref(L, TOSBINDL_LIBNAME, luaopen_tosbindl, 1);
   luaL_requiref(L, TOSBINDL_GEMDOS_LIBNAME, luaopen_gemdos, 1);
-  lua_pop(L, 2);
+  luaL_requiref(L, TOSBINDL_GEMPB_LIBNAME, luaopen_gempb, 1);
+  lua_pop(L, 3);
 #endif
 
   createargtable(L, argv, argc);  /* create table 'arg' */

@@ -127,7 +127,7 @@ static int pmain (lua_State *L) {
 #ifdef MLPCE_TOSBINDL_ENABLED
   /* Open tosbindl and gemdos library */
   luaL_requiref(L, TOSBINDL_LIBNAME, luaopen_tosbindl, 1);
-  luaL_requiref(L, TOSBINDL_GEMDOSLIBNAME, luaopen_gemdos, 1);
+  luaL_requiref(L, TOSBINDL_GEMDOS_LIBNAME, luaopen_gemdos, 1);
   lua_pop(L, 2);
 #endif
 

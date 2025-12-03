@@ -66,7 +66,7 @@ static const luaL_Reg loadedlibs[] = {
 #endif
 #ifdef MLPCE_TOSBINDL_ENABLED
   {TOSBINDL_LIBNAME, luaopen_tosbindl},
-  {TOSBINDL_GEMDOSLIBNAME, luaopen_gemdos},
+  {TOSBINDL_GEMDOS_LIBNAME, luaopen_gemdos},
 #endif
   {NULL, NULL}
 };

@@ -31,7 +31,8 @@
 
 
 /*
-** Computes ceil(log2(x))
+** Computes ceil(log2(x)), which is the smallest integer n such that
+** x <= (1 << n).
 */
 lu_byte luaO_ceillog2 (unsigned int x) {
   static const lu_byte log_2[256] = {  /* log_2[i - 1] = ceil(log2(i)) */
@@ -86,7 +87,7 @@ lu_byte luaO_codeparam (unsigned int p) {
 ** overflow, so we check which order is best.
 */
 l_mem luaO_applyparam (lu_byte p, l_mem x) {
-  unsigned int m = p & 0xF;  /* mantissa */
+  int m = p & 0xF;  /* mantissa */
   int e = (p >> 4);  /* exponent */
   if (e > 0) {  /* normalized? */
     e--;  /* correct exponent */

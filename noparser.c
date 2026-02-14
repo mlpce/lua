@@ -64,11 +64,10 @@ LUAI_FUNC int luaU_dump (lua_State* L, const Proto* f, lua_Writer w, void* data,
 #ifdef NOUNDUMP
 #include "lundump.h"
 
-/* LUAI_FUNC Closure* luaU_undump (lua_State* L, ZIO* Z, Mbuffer* buff, const char* name) { */
-LUAI_FUNC LClosure* luaU_undump (lua_State* L, ZIO* Z, const char* name) {
+LUAI_FUNC LClosure* luaU_undump (lua_State* L, ZIO* Z, const char* name, int fixed) {
   UNUSED(Z);
-  /* UNUSED(buff); */
   UNUSED(name);
+  UNUSED(fixed);
   lua_pushliteral(L,"binary loader not available");
   lua_error(L);
   return NULL;

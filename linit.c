@@ -37,6 +37,7 @@
 #ifdef MLPCE_TOSBINDL_ENABLED
 #include "include/tosbindl.h"
 #include "include/tbgemdos.h"
+#include "include/tbgempb.h"
 #endif
 
 /*
@@ -67,6 +68,7 @@ static const luaL_Reg loadedlibs[] = {
 #ifdef MLPCE_TOSBINDL_ENABLED
   {TOSBINDL_LIBNAME, luaopen_tosbindl},
   {TOSBINDL_GEMDOS_LIBNAME, luaopen_gemdos},
+  {TOSBINDL_GEMPB_LIBNAME, luaopen_gempb},
 #endif
   {NULL, NULL}
 };

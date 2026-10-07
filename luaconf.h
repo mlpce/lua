@@ -211,7 +211,7 @@
 
 /* See MLPCE_TOS_ENABLED setprogdir in loadlib.c */
 #if !defined(LUA_PATH_DEFAULT)
-#define LUA_PATH_DEFAULT ".\\?.lua;.\\?\\init.lua"
+#define LUA_PATH_DEFAULT ".\\?.lua;.\\?\\init.lua;"
 #endif
 #define MLPCE_TOS_PATH_1 "\\lua\\?.lua;"
 #define MLPCE_TOS_PATH_2 "\\lua\\?\\init.lua;"

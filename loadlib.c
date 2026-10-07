@@ -236,18 +236,16 @@ static void push_prefixed_tos_paths(lua_State *L,
 }
 
 /*
-** Prefix the path on top of the stack with extra search paths. The passed
-** string may be LUA_PATH_DEFAULT or from environment variable i.e. LUA_PATH or
-** LUA_PATH_5_4. The path is only adjusted if it is set to LUA_PATH_DEFAULT.
+** Succeed the path passed on top of the stack with extra search paths. The
+** passed path may be LUA_PATH_DEFAULT or from environment variable i.e.
+** LUA_PATH or LUA_PATH_5_4. Extra paths are only added if the passed path is
+** set to LUA_PATH_DEFAULT. The environment variable PATH is used to determine
+** the extra paths.
 **
-** The system may have booted off floppy, or hard disk, so the search path
+** The system may have booted off floppy, or hard disk, so the succeeding path
 ** needs to include the relevant drive. Additionally, path searching may be
 ** slow e.g. if accessing a floppy drive, so default searching is kept to a
 ** minimum.
-**
-** The environment variable PATH is used to determine the primary search path.
-** If the Lua module being loaded is not found there then a search is also made
-** relative to the current directory.
 **
 ** On TOS the desktop sets the environment PATH according to the boot drive so
 ** usually A:\ or C:\, however it is possible to customise PATH using e.g. an
@@ -255,22 +253,28 @@ static void push_prefixed_tos_paths(lua_State *L,
 ** PATH using the ';' delimiter to separate each path.
 **
 ** If the environment PATH is not found by getenv or is empty, then the current
-** drive is used for the primary search path.
+** drive is used for the extra search paths.
 **
 ** Example: When 'PATH=A:\':
-**  A:\lua\?.lua;A:\lua\?\init.lua;.\?.lua;.\?\init.lua
+**  .\?.lua;.\?\init.lua;A:\lua\?.lua;A:\lua\?\init.lua;
 **
 ** Example: When 'PATH=C:\;C:\script':
-**  C:\lua\?.lua;C:\lua\?\init.lua;C:\script\lua\?.lua;
-**  C:\script\lua\?\init.lua;.\?.lua;.\?\init.lua
+**  .\?.lua;.\?\init.lua;C:\lua\?.lua;C:\lua\?\init.lua;C:\script\lua\?.lua;
+**  C:\script\lua\?\init.lua;
 **
 ** Example: When PATH is missing or empty:
-**  \lua\?.lua;\lua\?\init.lua;.\?lua;.\?\init.lua
+**  .\?.lua;.\?\init.lua;\lua\?.lua;\lua\?\init.lua;
+**
+** Checking paths relative to the current directory first (e.g. .\?.lua)
+** facilitates a program overriding system installed modules with modules
+** belonging to the program. This can be reversed so system installed modules
+** take priority by defining MLPCE_PATH_CURRENT_LAST.
 **
 ** No special handling is done for LUA_CPATH_DEFAULT as shared libraries are
 ** not supported on TOS. LUA_CPATH_DEFAULT is set to empty string in luaconf.h
 ** for TOS therefore setprogdir returns early at the strcmp check in that case.
 */
+/* #define MLPCE_PATH_CURRENT_LAST */
 static void setprogdir (lua_State *L) {
   const char *const orig_path = luaL_checkstring(L, -1);
   const char *const env_path = getenv("PATH");
@@ -288,7 +292,9 @@ static void setprogdir (lua_State *L) {
     while (*ptr) {
       if (*ptr == ';') {
         push_prefixed_tos_paths(L, start_ptr, ptr);
+#ifdef MLPCE_PATH_CURRENT_LAST
         lua_rotate(L, -2, 1);
+#endif
         start_ptr = ++ptr;
       } else {
         ++ptr;
@@ -296,14 +302,18 @@ static void setprogdir (lua_State *L) {
     }
     if (start_ptr != ptr) {
       push_prefixed_tos_paths(L, start_ptr, ptr);
+#ifdef MLPCE_PATH_CURRENT_LAST
       lua_rotate(L, -2, 1);
+#endif
     }
   } else {
     luaL_checkstack(L, 2, NULL);
     lua_pushstring(L, MLPCE_TOS_PATH_1);
     lua_pushstring(L, MLPCE_TOS_PATH_2);
     lua_concat(L, 2);
+#ifdef MLPCE_PATH_CURRENT_LAST
     lua_rotate(L, -2, 1);
+#endif
   }
 
   lua_concat(L, lua_gettop(L) - initial + 1);

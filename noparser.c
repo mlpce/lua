@@ -32,9 +32,10 @@ void luaX_init (lua_State *L) {
   UNUSED(L);
 }
 
-LClosure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
+LClosure *luaY_parser (lua_State *L, ZIO *z, Table *anchor, Mbuffer *buff,
                       Dyndata *dyd, const char *name, int firstchar) {
   UNUSED(z);
+  UNUSED(anchor);
   UNUSED(buff);
   UNUSED(dyd);
   UNUSED(name);
@@ -64,8 +65,9 @@ LUAI_FUNC int luaU_dump (lua_State* L, const Proto* f, lua_Writer w, void* data,
 #ifdef NOUNDUMP
 #include "lundump.h"
 
-LUAI_FUNC LClosure* luaU_undump (lua_State* L, ZIO* Z, const char* name, int fixed) {
+LUAI_FUNC LClosure* luaU_undump (lua_State* L, ZIO* Z, Table *anchor, const char* name, int fixed) {
   UNUSED(Z);
+  UNUSED(anchor);
   UNUSED(name);
   UNUSED(fixed);
   lua_pushliteral(L,"binary loader not available");

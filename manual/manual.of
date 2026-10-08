@@ -1728,7 +1728,7 @@ global X <const>, _G
 X = 1           -- ERROR
 _ENV.X = 1      -- Ok
 _G.print(X)     -- Ok
-foo()         -- 'foo' can freely change any global
+foo()           -- 'foo' can freely change any global
 }
 
 A chunk is also a block @see{chunks},
@@ -2692,7 +2692,19 @@ which behaves like a nil value.
 
 @sect3{constchar|@title{Pointers to Strings}
 
-Several functions in the API return pointers (@T{const char*})
+Several functions in the API have parameters
+that are pointers to C strings (@T{const char*}).
+Some of these parameters have an associated length (@T{size_t}).
+Unless stated otherwise,
+when there is an associated length,
+the string can contain embedded zeros;
+moreover, the pointer can be @id{NULL} if the length is zero.
+When there is no associated length,
+the pointer must point to a zero-terminated string.
+In any case, the string contents should remain unchanged
+until the function returns.
+
+Several functions in the API also return pointers (@T{const char*})
 to Lua strings in the stack.
 (See @Lid{lua_pushfstring}, @Lid{lua_pushlstring},
 @Lid{lua_pushstring}, and @Lid{lua_tolstring}.
@@ -3903,8 +3915,12 @@ like any Lua object.
 This function creates and pushes on the stack a new full userdata,
 with @id{nuvalue} associated Lua values, called @id{user values},
 plus an associated block of raw memory with @id{size} bytes.
-(The user values can be set and read with the functions
-@Lid{lua_setiuservalue} and @Lid{lua_getiuservalue}.)
+
+The user values can be set and read with the functions
+@Lid{lua_setiuservalue} and @Lid{lua_getiuservalue}.
+The block of memory is suitably aligned for any @N{ISO C} object.
+(See macro @id{LUAI_MAXALIGN} in file @id{luaconf.h} for other
+alignment requirements.)
 
 The function returns the address of the block of memory.
 Lua ensures that this address is valid as long as
@@ -3946,8 +3962,8 @@ this confuses the next call to @Lid{lua_next}.
 
 This function may raise an error if the given key
 is neither @nil nor present in the table.
-See function @Lid{next} for the caveats of modifying
-the table during its traversal.
+
+See function @Lid{next} for more details about the traversal.
 
 }
 
@@ -4432,7 +4448,7 @@ Starts and resumes a coroutine in the given thread @id{L}.
 To start a coroutine,
 you push the main function plus any arguments
 onto the empty stack of the thread.
-then you call @Lid{lua_resume},
+Then you call @Lid{lua_resume},
 with @id{nargs} being the number of arguments.
 The function returns when the coroutine suspends,
 finishes its execution, or raises an unprotected error.
@@ -4612,7 +4628,7 @@ You can resume threads with status @Lid{LUA_OK}
 }
 
 @APIEntry{size_t lua_stringtonumber (lua_State *L, const char *s);|
-@apii{0,1,-}
+@apii{0,0|1,-}
 
 Converts the zero-terminated string @id{s} to a number,
 pushes that number into the stack,
@@ -4942,7 +4958,7 @@ Lua calls the given @x{continuation function} @id{k} to continue
 the execution of the @N{C function} that yielded @see{continuations}.
 This continuation function receives the same stack
 from the previous function,
-with the @id{n} results removed and
+with all the results (@id{nresults}) removed and
 replaced by the arguments passed to @Lid{lua_resume}.
 Moreover,
 the continuation function receives the value @id{ctx}
@@ -5032,7 +5048,7 @@ the function was defined in a string where
 }
 
 @item{@id{srclen}|
-The length of the string @id{source}.
+the length of the string @id{source}.
 }
 
 @item{@id{short_src}|
@@ -5196,7 +5212,7 @@ running at the given level;
 }
 
 @item{@Char{S}|
-fills in the fields @id{source}, @id{short_src},
+fills in the fields @id{source}, @id{srclen}, @id{short_src},
 @id{linedefined}, @id{lastlinedefined}, and @id{what};
 }
 
@@ -5372,7 +5388,9 @@ Returns @id{NULL} (and pops nothing)
 when the index is greater than
 the number of active local variables.
 
-Parameters @id{ar} and @id{n} are as in the function @Lid{lua_getlocal}.
+Parameters @id{ar} and @id{n} are as in the function @Lid{lua_getlocal},
+except that @id{ar} cannot be @id{NULL},
+as @id{lua_setlocal} only operates on activation records.
 
 }
 
@@ -6052,6 +6070,14 @@ and returns 1.
 In both cases,
 the function pushes onto the stack the final value associated
 with @id{tname} in the registry.
+
+Usage note: Beware the use of the return value of this function
+to conditionally initialize the new metatable
+(e.g., by adding metamethods to it).
+If the initialization raises an error,
+the metatable will not be properly initialized,
+but a subsequent execution of that code will detect that the
+metatable already exists and then skip the initialization.
 
 }
 
@@ -6816,8 +6842,7 @@ for k,v in pairs(t) do @rep{body} end
 }
 will iterate over all key@En{}value pairs of table @id{t}.
 
-See function @Lid{next} for the caveats of modifying
-the table during its traversal.
+See function @Lid{next} for more details about the traversal.
 
 }
 
@@ -9107,6 +9132,7 @@ which automatically removes the file when the program ends.
 
 This library provides
 the functionality of the @link{debugI|debug interface} to Lua programs.
+
 You should exert care when using this library.
 Several of its functions
 violate basic assumptions about Lua code
@@ -9116,6 +9142,8 @@ that userdata metatables cannot be changed by Lua code;
 that Lua programs do not crash)
 and therefore can compromise otherwise secure code.
 Moreover, some functions in this library may be slow.
+It is good practice to always require this library explicitly
+before using it.
 
 All functions in this library are provided
 inside the @defid{debug} table.
@@ -9594,6 +9622,9 @@ change between versions.
 @item{
 The word @Rw{global} is a reserved word.
 Do not use it as a regular name.
+
+The compilation option @id{LUA_COMPAT_GLOBAL} (see @id{luaconf.h})
+makes @id{global} a regular word.
 }
 
 @item{
@@ -9725,7 +9756,7 @@ and @bnfNter{LiteralString}, see @See{lexical}.)
 @OrNL	@Rw{local} @Rw{function} @bnfNter{Name} funcbody
 @OrNL	@Rw{global} @Rw{function} @bnfNter{Name} funcbody
 @OrNL	@Rw{local} attnamelist @bnfopt{@bnfter{=} explist}
-@OrNL	@Rw{global} attnamelist
+@OrNL	@Rw{global} attnamelist @bnfopt{@bnfter{=} explist}
 @OrNL	@Rw{global} @bnfopt{attrib} @bnfter{*}
 }
 

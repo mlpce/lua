@@ -150,7 +150,7 @@ LUA_API lua_Hook lua_gethook (lua_State *L) {
 
 
 LUA_API int lua_gethookmask (lua_State *L) {
-  return L->hookmask;
+  return cast_int(L->hookmask);
 }
 
 
@@ -291,7 +291,7 @@ static int nextline (const Proto *p, int currentline, int pc) {
 
 static void collectvalidlines (lua_State *L, Closure *f) {
   if (!LuaClosure(f)) {
-    setnilvalue(s2v(L->top.p));
+    setnilvalue2s(L->top.p);
     api_incr_top(L);
   }
   else {
@@ -580,7 +580,7 @@ static const char *getobjname (const Proto *p, int lastpc, int reg,
         kname(p, k, name);
         return isEnv(p, lastpc, i, 1);
       }
-      case OP_GETTABLE: {
+      case OP_GETTABLE: case OP_GETVARG: {
         int k = GETARG_C(i);  /* key index */
         rname(p, lastpc, k, name);
         return isEnv(p, lastpc, i, 0);

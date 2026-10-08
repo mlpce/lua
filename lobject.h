@@ -208,7 +208,8 @@ typedef union {
 #define ttisstrictnil(o)	checktag((o), LUA_VNIL)
 
 
-#define setnilvalue(obj) settt_(obj, LUA_VNIL)
+#define setnilvalue(obj)	settt_(obj, LUA_VNIL)
+#define setnilvalue2s(stk)	setnilvalue(s2v(stk))
 
 
 #define isabstkey(v)		checktag((v), LUA_VABSTKEY)
@@ -826,7 +827,7 @@ typedef struct Table {
 
 
 #define twoto(x)	(1u<<(x))
-#define sizenode(t)	(twoto((t)->lsizenode))
+#define sizenode(t)	cast_uint(twoto((t)->lsizenode))
 
 
 /* size of buffer for 'luaO_utf8esc' function */

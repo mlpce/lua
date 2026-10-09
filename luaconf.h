@@ -807,7 +807,11 @@
 @@ LUAI_MAXALIGN defines fields that, when used in a union, ensure
 ** maximum alignment for the other items in that union.
 */
+#if defined(MLPCE_TOS_ENABLED)
+#define LUAI_MAXALIGN short s
+#else
 #define LUAI_MAXALIGN  lua_Number n; double u; void *s; lua_Integer i; long l
+#endif
 
 /* }================================================================== */
 

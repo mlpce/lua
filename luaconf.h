@@ -757,7 +757,9 @@
 ** memory areas offered by Lua (e.g., userdata memory).
 ** Add fields to it if you need alignment for non-ISO objects.
 */
-#if defined(LLONG_MAX)
+#if defined(MLPCE_TOS_ENABLED)
+#define LUAI_MAXALIGN short s
+#elif defined(LLONG_MAX)
 /* use ISO C99 stuff */
 #define LUAI_MAXALIGN long double u; void *s; long long l
 #else

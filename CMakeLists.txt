@@ -212,16 +212,20 @@ else()
   )
 endif()
 
-# For TOS use .TTP executable suffix
-set(EXECUTABLE_SUFFIX "")
+# For TOS use executable suffix
+set(LUA_EXECUTABLE_SUFFIX "")
+set(LUAB_EXECUTABLE_SUFFIX "")
+set(LUAC_EXECUTABLE_SUFFIX "")
 if (ATARI_TOS_ENABLED)
-  set(EXECUTABLE_SUFFIX ".ttp")
+  set(LUA_EXECUTABLE_SUFFIX ".prg")
+  set(LUAB_EXECUTABLE_SUFFIX ".prg")
+  set(LUAC_EXECUTABLE_SUFFIX ".ttp")
 endif()
 
 # Names for the executables
-set(LUA_EXECUTABLE_NAME "lua${EXECUTABLE_SUFFIX}")
-set(LUAC_EXECUTABLE_NAME "luac${EXECUTABLE_SUFFIX}")
-set(LUAB_EXECUTABLE_NAME "luab${EXECUTABLE_SUFFIX}")
+set(LUA_EXECUTABLE_NAME "lua${LUA_EXECUTABLE_SUFFIX}")
+set(LUAB_EXECUTABLE_NAME "luab${LUAB_EXECUTABLE_SUFFIX}")
+set(LUAC_EXECUTABLE_NAME "luac${LUAC_EXECUTABLE_SUFFIX}")
 
 # The libraries to link to lua
 set(LUA_LINK_LIBRARIES

@@ -770,7 +770,7 @@ static int mlpce_about(lua_State *L) {
   /* About tosbindl */
   luaL_checkstack(L, 1, NULL);
   lua_pushfstring(L, "%s (MIT) %s\n"
-    "  A GEMDOS binding for Lua.\n",
+    "  A GEMDOS/Trap #2 binding for Lua.\n",
     MLPCE_TOSBINDL_PRJ, MLPCE_TOSBINDL_REV);
 #endif
 #ifdef MLPCE_SLINPUT_ENABLED
